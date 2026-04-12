@@ -653,4 +653,175 @@ program
     }
   });
 
+// ============================================================
+// 经验回流命令 (方案C: 混合模式)
+// ============================================================
+
+// 导出经验数据
+program
+  .command('export <output>')
+  .description('Export accumulated knowledge and strategies to a portable file')
+  .option('-c, --config <path>', 'Config file path', '.flowharness/config.yml')
+  .option('-t, --type <type>', 'Export type: all, knowledge, strategies, memory', 'all')
+  .option('--project-id <id>', 'Project identifier for the export', '')
+  .option('--min-confidence <n>', 'Minimum confidence threshold (0-1)', '0.7')
+  .action(async (output, options) => {
+    try {
+      const fs = require('fs');
+      const KnowledgeBase = require('./knowledge-base');
+      const { MemoryStore } = require('./memory-store');
+
+      const projectId = options.projectId || path.basename(process.cwd());
+      const minConfidence = parseFloat(options.minConfidence);
+      const exportType = options.type;
+
+      const pack = {
+        version: '1.0',
+        format: 'flowharness-export',
+        projectId,
+        exportedAt: new Date().toISOString(),
+        types: []
+      };
+
+      // 导出知识库
+      if (exportType === 'all' || exportType === 'knowledge') {
+        const kb = new KnowledgeBase();
+        kb.load();
+        pack.knowledge = kb.exportData({ projectId, minConfidence });
+        pack.types.push('knowledge');
+        const pCount = (pack.knowledge.patterns.successful_patterns || []).length
+          + (pack.knowledge.patterns.failure_patterns || []).length;
+        console.log(chalk.cyan(`  Knowledge: ${pCount} patterns, ${kb.patterns.statistics.total_runs} runs`));
+      }
+
+      // 导出策略
+      if (exportType === 'all' || exportType === 'strategies') {
+        try {
+          const { EvolutionEngine } = require('./evolution-engine');
+          const engine = new EvolutionEngine();
+          pack.strategies = engine.exportStrategies(projectId);
+          pack.types.push('strategies');
+          console.log(chalk.cyan(`  Strategies: ${(pack.strategies.strategies || []).length} exported`));
+        } catch (e) {
+          console.log(chalk.gray(`  Strategies: skipped (${e.message})`));
+        }
+      }
+
+      // 导出记忆
+      if (exportType === 'all' || exportType === 'memory') {
+        const mem = new MemoryStore();
+        mem.load();
+        pack.memory = mem.export();
+        pack.types.push('memory');
+        const mCount = Object.values(pack.memory.memories || {})
+          .reduce((sum, arr) => sum + arr.length, 0);
+        console.log(chalk.cyan(`  Memory: ${mCount} entries`));
+      }
+
+      fs.writeFileSync(output, JSON.stringify(pack, null, 2), 'utf8');
+      console.log(chalk.green(`\n✨ Exported to ${output}`));
+      console.log(chalk.gray(`   Types: ${pack.types.join(', ')}`));
+      console.log(chalk.gray(`   Project: ${projectId}\n`));
+
+    } catch (error) {
+      console.error(chalk.red(`\n💥 Export failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+// 导入经验数据
+program
+  .command('import <input>')
+  .description('Import knowledge and strategies from an export file')
+  .option('-c, --config <path>', 'Config file path', '.flowharness/config.yml')
+  .option('-t, --type <type>', 'Import type: all, knowledge, strategies, memory', 'all')
+  .option('--dry-run', 'Preview what would be imported without applying')
+  .action(async (input, options) => {
+    try {
+      const fs = require('fs');
+
+      if (!fs.existsSync(input)) {
+        console.error(chalk.red(`File not found: ${input}`));
+        process.exit(1);
+      }
+
+      const pack = JSON.parse(fs.readFileSync(input, 'utf8'));
+
+      if (!pack.format || pack.format !== 'flowharness-export') {
+        console.error(chalk.red('Invalid export file format'));
+        process.exit(1);
+      }
+
+      console.log(chalk.blue(`\n📦 Import from: ${input}`));
+      console.log(chalk.gray(`   Source: ${pack.projectId} (${pack.exportedAt})`));
+      console.log(chalk.gray(`   Types: ${(pack.types || []).join(', ')}\n`));
+
+      const importType = options.type;
+
+      // 导入知识库
+      if ((importType === 'all' || importType === 'knowledge') && pack.knowledge) {
+        const KnowledgeBase = require('./knowledge-base');
+        const kb = new KnowledgeBase();
+        kb.load();
+
+        if (options.dryRun) {
+          const sp = (pack.knowledge.patterns.successful_patterns || []).length;
+          const fp = (pack.knowledge.patterns.failure_patterns || []).length;
+          console.log(chalk.yellow(`  [DRY RUN] Knowledge: would merge ${sp} success + ${fp} failure patterns`));
+        } else {
+          const result = kb.mergeData(pack.knowledge);
+          if (result.success) {
+            console.log(chalk.green(`  Knowledge: ${result.merged} merged, ${result.updated} updated, ${result.skipped} skipped`));
+          } else {
+            console.log(chalk.red(`  Knowledge: ${result.error}`));
+          }
+        }
+      }
+
+      // 导入策略
+      if ((importType === 'all' || importType === 'strategies') && pack.strategies) {
+        try {
+          const { EvolutionEngine } = require('./evolution-engine');
+          const engine = new EvolutionEngine();
+
+          if (options.dryRun) {
+            const compat = engine.checkCompatibility(pack.strategies, {});
+            console.log(chalk.yellow(`  [DRY RUN] Strategies: ${(pack.strategies.strategies || []).length} strategies, compatibility: ${compat.score || 'N/A'}`));
+          } else {
+            const result = engine.importStrategies(pack.strategies);
+            console.log(chalk.green(`  Strategies: ${result.imported} imported, ${result.skipped} skipped`));
+          }
+        } catch (e) {
+          console.log(chalk.gray(`  Strategies: skipped (${e.message})`));
+        }
+      }
+
+      // 导入记忆
+      if ((importType === 'all' || importType === 'memory') && pack.memory) {
+        const { MemoryStore } = require('./memory-store');
+        const mem = new MemoryStore();
+        mem.load();
+
+        if (options.dryRun) {
+          const mCount = Object.values(pack.memory.memories || {})
+            .reduce((sum, arr) => sum + arr.length, 0);
+          console.log(chalk.yellow(`  [DRY RUN] Memory: would import ${mCount} entries`));
+        } else {
+          const count = mem.import(pack.memory);
+          console.log(chalk.green(`  Memory: ${count} entries imported`));
+        }
+      }
+
+      if (options.dryRun) {
+        console.log(chalk.yellow('\n⚠️  Dry run — no changes applied. Remove --dry-run to import.\n'));
+      } else {
+        console.log(chalk.green('\n✨ Import complete!\n'));
+      }
+
+    } catch (error) {
+      console.error(chalk.red(`\n💥 Import failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
 program.parse();

@@ -210,6 +210,173 @@ class KnowledgeBase {
     return optimizations;
   }
 
+  // ----------------------------------------------------------
+  // 导出 / 合并 (方案C: 混合模式经验回流)
+  // ----------------------------------------------------------
+
+  /**
+   * 导出知识库数据（可移植格式）
+   * @param {Object} options
+   * @param {string} options.projectId - 项目标识
+   * @param {number} options.minConfidence - 最低置信度 (默认 0.7)
+   * @returns {Object} 导出包
+   */
+  exportData(options = {}) {
+    if (!this.patterns) this.load();
+
+    const minConfidence = options.minConfidence || 0.7;
+    const projectId = options.projectId || 'unknown';
+
+    // 只导出有价值的模式 (有足够样本量的)
+    const exportPatterns = this.patterns.successful_patterns
+      .filter(p => p.total_count >= 3 && p.success_rate >= minConfidence);
+
+    const exportFailures = this.patterns.failure_patterns
+      .filter(p => p.total_count >= 3);
+
+    return {
+      version: '1.0',
+      type: 'knowledge',
+      projectId,
+      exportedAt: new Date().toISOString(),
+      patterns: {
+        successful_patterns: exportPatterns,
+        failure_patterns: exportFailures,
+        statistics: { ...this.patterns.statistics }
+      },
+      metrics: this.metrics ? {
+        metrics: (this.metrics.metrics || []).slice(-200),
+        aggregated: this.metrics.aggregated || {}
+      } : null
+    };
+  }
+
+  /**
+   * 合并外部知识库数据
+   * @param {Object} pack - exportData() 的输出
+   * @returns {Object} 合并结果
+   */
+  mergeData(pack) {
+    if (!this.patterns) this.load();
+
+    if (!pack || pack.type !== 'knowledge' || !pack.patterns) {
+      return { success: false, error: 'Invalid knowledge pack format' };
+    }
+
+    let merged = 0;
+    let skipped = 0;
+    let updated = 0;
+
+    // 合并成功模式
+    for (const ext of (pack.patterns.successful_patterns || [])) {
+      const existing = this.patterns.successful_patterns
+        .find(p => p.pattern === ext.pattern);
+
+      if (existing) {
+        // 加权合并: 合并计数，重新计算成功率
+        const totalCount = existing.total_count + ext.total_count;
+        const successCount = Math.round(existing.success_rate * existing.total_count)
+          + Math.round(ext.success_rate * ext.total_count);
+        existing.total_count = totalCount;
+        existing.success_count = successCount;
+        existing.success_rate = totalCount > 0 ? successCount / totalCount : 0;
+        existing.avg_time = existing.total_count > 0
+          ? Math.round((existing.avg_time * (existing.total_count - ext.total_count)
+            + (ext.avg_time || 0) * ext.total_count) / totalCount)
+          : existing.avg_time;
+        // 重新评估推荐级别
+        if (existing.success_rate > 0.9 && existing.total_count >= 10) {
+          existing.recommendation = 'highly_reliable';
+        } else if (existing.success_rate > 0.7) {
+          existing.recommendation = 'reliable';
+        }
+        updated++;
+      } else {
+        // 新模式: 降低置信度导入 (0.8x)
+        const imported = { ...ext };
+        imported.success_rate = Math.round(ext.success_rate * 0.8 * 100) / 100;
+        imported.recommendation = imported.success_rate > 0.7 ? 'reliable' : null;
+        imported.learned_at = new Date().toISOString();
+        this.patterns.successful_patterns.push(imported);
+        merged++;
+      }
+    }
+
+    // 合并失败模式
+    for (const ext of (pack.patterns.failure_patterns || [])) {
+      const existing = this.patterns.failure_patterns
+        .find(p => p.pattern === ext.pattern);
+
+      if (existing) {
+        const totalCount = existing.total_count + ext.total_count;
+        const failCount = Math.round(existing.failure_rate * existing.total_count)
+          + Math.round(ext.failure_rate * ext.total_count);
+        existing.total_count = totalCount;
+        existing.failure_count = failCount;
+        existing.failure_rate = totalCount > 0 ? failCount / totalCount : 0;
+        // 合并错误列表 (去重)
+        for (const err of (ext.errors || [])) {
+          if (!existing.errors.includes(err)) {
+            existing.errors.push(err);
+          }
+        }
+        if (existing.failure_rate > 0.5 && existing.total_count >= 5) {
+          existing.recommendation = 'needs_attention';
+        }
+        updated++;
+      } else {
+        const imported = { ...ext, errors: [...(ext.errors || [])] };
+        imported.learned_at = new Date().toISOString();
+        this.patterns.failure_patterns.push(imported);
+        merged++;
+      }
+    }
+
+    // 合并统计 (累加)
+    if (pack.patterns.statistics) {
+      const s = this.patterns.statistics;
+      const ext = pack.patterns.statistics;
+      const oldTotal = s.total_runs;
+      s.total_runs += ext.total_runs || 0;
+      s.successful_runs += ext.successful_runs || 0;
+      s.failed_runs += ext.failed_runs || 0;
+      if (s.total_runs > 0) {
+        s.avg_execution_time = Math.round(
+          (s.avg_execution_time * oldTotal + (ext.avg_execution_time || 0) * (ext.total_runs || 0))
+          / s.total_runs
+        );
+      }
+    }
+
+    // 合并 metrics (追加去重)
+    if (pack.metrics && pack.metrics.metrics && this.metrics) {
+      const existingKeys = new Set(
+        this.metrics.metrics.map(m => `${m.workflow}:${m.step}:${m.timestamp}`)
+      );
+      for (const m of pack.metrics.metrics) {
+        const key = `${m.workflow}:${m.step}:${m.timestamp}`;
+        if (!existingKeys.has(key)) {
+          this.metrics.metrics.push(m);
+          merged++;
+        } else {
+          skipped++;
+        }
+      }
+    }
+
+    this.patterns.last_updated = new Date().toISOString();
+    this.save();
+
+    return {
+      success: true,
+      merged,
+      updated,
+      skipped,
+      source: pack.projectId || 'unknown',
+      totalPatterns: this.patterns.successful_patterns.length + this.patterns.failure_patterns.length
+    };
+  }
+
   getDefaultPatterns() {
     return {
       version: '1.0',
