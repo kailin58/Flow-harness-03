@@ -1,0 +1,27 @@
+# 测试和文档 — 安装时不需要
+test/
+test-suite.sh
+meeting/
+examples/
+.claude/
+.flowharness/
+
+# 开发文档
+AGENTS.md
+DETAILED_STEPS.md
+FIXES_COMPLETE.md
+IMPLEMENTATION_GAP.md
+IMPLEMENTATION_PLAN.md
+IMPROVEMENT_PLAN.md
+IMPROVEMENT_REPORT.md
+MISSING_FEATURES.md
+PHASE1_COMPLETE.md
+PHASE2_COMPLETE.md
+PROGRESS_REPORT.md
+PROJECT_SUMMARY.md
+QUICK_START.md
+ROADMAP.md
+
+# 杂项
+.DS_Store
+*.log

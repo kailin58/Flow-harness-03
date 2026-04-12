@@ -1,0 +1,37 @@
+{
+  "name": "flow-harness",
+  "version": "0.1.0",
+  "description": "A lightweight, configuration-driven flow control and orchestration system for AI agents",
+  "main": "src/index.js",
+  "bin": {
+    "flowharness": "./src/cli.js"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kailin58/Flow-harness.git"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node -e \"const fs=require('fs');const f=fs.readdirSync('test').filter(x=>x.startsWith('test-')&&x.endsWith('.js'));let p=0,fail=0;for(const t of f){try{require('child_process').execSync('node test/'+t,{timeout:60000});p++}catch(e){fail++;console.log('FAIL:',t)}}console.log(p+' passed,',fail+' failed');if(fail)process.exit(1)\""
+  },
+  "keywords": [
+    "agent",
+    "harness",
+    "orchestration",
+    "workflow",
+    "security",
+    "learning"
+  ],
+  "author": "kailin58",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2"
+  }
+}

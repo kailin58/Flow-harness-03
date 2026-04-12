@@ -1,0 +1,164 @@
+version: "1.0"
+
+# 流程编排配置
+workflows:
+  # 代码审查流程
+  - name: "code-review"
+    description: "自动代码审查流程"
+    trigger: "on_file_change"
+    enabled: true
+    steps:
+      - type: "check"
+        name: "syntax"
+        action: "lint"
+      - type: "check"
+        name: "security"
+        action: "security_scan"
+      - type: "require"
+        name: "human_approval"
+        timeout: 3600
+
+  # 测试流程
+  - name: "test"
+    description: "运行测试套件"
+    trigger: "manual"
+    enabled: true
+    steps:
+      - type: "run"
+        name: "unit_tests"
+        command: "npm test"
+      - type: "check"
+        name: "coverage"
+        threshold: 80
+
+  # 部署流程
+  - name: "deploy"
+    description: "部署到生产环境"
+    trigger: "manual"
+    enabled: true
+    steps:
+      - type: "run"
+        name: "tests"
+        command: "npm test"
+      - type: "check"
+        name: "coverage"
+        threshold: 80
+      - type: "sandbox"
+        name: "staging"
+        environment: "staging"
+      - type: "require"
+        name: "approval"
+        approvers: ["admin"]
+      - type: "execute"
+        name: "deploy"
+        command: "npm run deploy"
+
+# 安全策略配置
+policies:
+  # 文件访问控制
+  file_access:
+    mode: "whitelist"  # whitelist 或 blacklist
+    allow:
+      - "src/**"
+      - "tests/**"
+      - "docs/**"
+      - "*.md"
+      - "package.json"
+    deny:
+      - ".env"
+      - ".env.*"
+      - "secrets/**"
+      - "*.key"
+      - "*.pem"
+      - "node_modules/**"
+
+  # 命令执行控制
+  commands:
+    mode: "whitelist"
+    allow:
+      - "npm"
+      - "node"
+      - "git"
+      - "pytest"
+      - "python"
+      - "pip"
+      - "yarn"
+    deny:
+      - "rm -rf /"
+      - "dd"
+      - "mkfs"
+      - "format"
+
+    # 危险命令模式
+    dangerous_patterns:
+      - "rm.*-rf"
+      - "sudo.*rm"
+      - ">.*\/dev\/sd"
+
+  # 网络访问控制
+  network:
+    enabled: false
+    whitelist:
+      - "api.github.com"
+      - "registry.npmjs.org"
+      - "pypi.org"
+    blacklist:
+      - "*.onion"
+
+  # 资源限制
+  resources:
+    max_execution_time: 300  # 秒
+    max_memory: 512  # MB
+    max_file_size: 10  # MB
+    max_files_created: 100
+
+# 学习机制配置
+learning:
+  enabled: true
+  auto_optimize: true
+  feedback_loop: "after_each_run"
+
+  # 数据收集
+  collect:
+    - "execution_time"
+    - "success_rate"
+    - "error_patterns"
+    - "resource_usage"
+
+  # 优化策略
+  optimization:
+    min_samples: 10  # 最少样本数
+    confidence_threshold: 0.8  # 置信度阈值
+    auto_apply: false  # 是否自动应用优化
+
+# 可观测性配置
+observability:
+  logging:
+    enabled: true
+    level: "info"  # debug, info, warn, error
+    output: ".flowharness/logs"
+
+  audit:
+    enabled: true
+    log_all_commands: true
+    log_file_access: true
+    output: ".flowharness/audit"
+
+  metrics:
+    enabled: true
+    collect_interval: 60  # 秒
+    output: ".flowharness/metrics"
+
+# 钩子配置
+hooks:
+  before_workflow:
+    - "echo 'Starting workflow...'"
+
+  after_workflow:
+    - "echo 'Workflow completed'"
+
+  on_error:
+    - "echo 'Error occurred, rolling back...'"
+
+  on_success:
+    - "echo 'Success!'"

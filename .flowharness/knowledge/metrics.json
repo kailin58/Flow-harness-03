@@ -1,0 +1,4843 @@
+{
+  "version": "1.0",
+  "metrics": [
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 728,
+      "timestamp": "2026-04-11T14:24:51.859Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 896,
+      "timestamp": "2026-04-11T14:27:56.953Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 490,
+      "timestamp": "2026-04-11T14:28:07.041Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 497,
+      "timestamp": "2026-04-11T14:28:16.236Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 548,
+      "timestamp": "2026-04-11T14:28:38.176Z",
+      "error": null
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 709,
+      "timestamp": "2026-04-11T14:36:35.515Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 806,
+      "timestamp": "2026-04-11T14:36:36.554Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 688,
+      "timestamp": "2026-04-11T14:36:37.325Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 509,
+      "timestamp": "2026-04-11T14:36:37.930Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 443,
+      "timestamp": "2026-04-11T14:36:38.461Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 721,
+      "timestamp": "2026-04-11T14:36:39.457Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 270,
+      "timestamp": "2026-04-11T14:36:39.833Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 586,
+      "timestamp": "2026-04-11T14:36:40.500Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 433,
+      "timestamp": "2026-04-11T14:36:41.016Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 758,
+      "timestamp": "2026-04-11T14:36:41.856Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 861,
+      "timestamp": "2026-04-11T15:24:45.234Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 723,
+      "timestamp": "2026-04-11T15:24:46.060Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 724,
+      "timestamp": "2026-04-11T15:24:47.369Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 509,
+      "timestamp": "2026-04-11T15:24:48.149Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 469,
+      "timestamp": "2026-04-11T15:24:48.753Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 784,
+      "timestamp": "2026-04-11T15:24:50.029Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 459,
+      "timestamp": "2026-04-11T15:24:50.591Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 669,
+      "timestamp": "2026-04-11T15:24:51.361Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 451,
+      "timestamp": "2026-04-11T15:24:51.940Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 546,
+      "timestamp": "2026-04-11T15:24:52.670Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 711,
+      "timestamp": "2026-04-11T15:25:09.029Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 744,
+      "timestamp": "2026-04-11T15:25:09.888Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 758,
+      "timestamp": "2026-04-11T15:25:10.793Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 585,
+      "timestamp": "2026-04-11T15:25:11.493Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 448,
+      "timestamp": "2026-04-11T15:25:12.057Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 599,
+      "timestamp": "2026-04-11T15:25:12.963Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 324,
+      "timestamp": "2026-04-11T15:25:13.458Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 628,
+      "timestamp": "2026-04-11T15:25:14.224Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 375,
+      "timestamp": "2026-04-11T15:25:14.738Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 635,
+      "timestamp": "2026-04-11T15:25:15.474Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 617,
+      "timestamp": "2026-04-11T15:26:56.229Z",
+      "error": null
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 626,
+      "timestamp": "2026-04-11T15:27:05.269Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 725,
+      "timestamp": "2026-04-11T15:27:06.284Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 980,
+      "timestamp": "2026-04-11T15:27:07.403Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 479,
+      "timestamp": "2026-04-11T15:27:08.703Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 696,
+      "timestamp": "2026-04-11T15:27:09.692Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 563,
+      "timestamp": "2026-04-11T15:27:10.765Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 397,
+      "timestamp": "2026-04-11T15:27:11.296Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 689,
+      "timestamp": "2026-04-11T15:27:12.087Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 372,
+      "timestamp": "2026-04-11T15:27:12.553Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 845,
+      "timestamp": "2026-04-11T15:27:13.504Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 555,
+      "timestamp": "2026-04-11T15:28:28.857Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 711,
+      "timestamp": "2026-04-11T15:28:29.731Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 660,
+      "timestamp": "2026-04-11T15:28:30.572Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 498,
+      "timestamp": "2026-04-11T15:28:31.199Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 399,
+      "timestamp": "2026-04-11T15:28:31.725Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 572,
+      "timestamp": "2026-04-11T15:28:32.583Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 404,
+      "timestamp": "2026-04-11T15:28:33.128Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 634,
+      "timestamp": "2026-04-11T15:28:33.974Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 440,
+      "timestamp": "2026-04-11T15:28:34.583Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 602,
+      "timestamp": "2026-04-11T15:28:35.301Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 923,
+      "timestamp": "2026-04-11T15:28:37.276Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 722,
+      "timestamp": "2026-04-11T15:28:38.149Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 661,
+      "timestamp": "2026-04-11T15:28:39.012Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 486,
+      "timestamp": "2026-04-11T15:28:39.673Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 481,
+      "timestamp": "2026-04-11T15:28:40.297Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 790,
+      "timestamp": "2026-04-11T15:28:42.254Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 462,
+      "timestamp": "2026-04-11T15:28:43.426Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 705,
+      "timestamp": "2026-04-11T15:28:44.538Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 380,
+      "timestamp": "2026-04-11T15:28:45.098Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 618,
+      "timestamp": "2026-04-11T15:28:45.844Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 732,
+      "timestamp": "2026-04-11T15:28:47.871Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 822,
+      "timestamp": "2026-04-11T15:28:48.882Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 589,
+      "timestamp": "2026-04-11T15:28:49.600Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 571,
+      "timestamp": "2026-04-11T15:28:50.397Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 366,
+      "timestamp": "2026-04-11T15:28:50.863Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 629,
+      "timestamp": "2026-04-11T15:28:51.860Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 486,
+      "timestamp": "2026-04-11T15:28:52.830Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 646,
+      "timestamp": "2026-04-11T15:28:54.381Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 438,
+      "timestamp": "2026-04-11T15:28:54.940Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 565,
+      "timestamp": "2026-04-11T15:28:55.659Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 863,
+      "timestamp": "2026-04-11T15:35:05.388Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 633,
+      "timestamp": "2026-04-11T15:35:06.131Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 675,
+      "timestamp": "2026-04-11T15:35:06.923Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 540,
+      "timestamp": "2026-04-11T15:35:07.620Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 327,
+      "timestamp": "2026-04-11T15:35:08.042Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 684,
+      "timestamp": "2026-04-11T15:35:09.003Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 365,
+      "timestamp": "2026-04-11T15:35:09.564Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 628,
+      "timestamp": "2026-04-11T15:35:10.360Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 462,
+      "timestamp": "2026-04-11T15:35:11.017Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 740,
+      "timestamp": "2026-04-11T15:35:12.044Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 964,
+      "timestamp": "2026-04-11T15:35:25.472Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 572,
+      "timestamp": "2026-04-11T15:35:26.218Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 749,
+      "timestamp": "2026-04-11T15:35:27.123Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 566,
+      "timestamp": "2026-04-11T15:35:27.932Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 407,
+      "timestamp": "2026-04-11T15:35:28.491Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 979,
+      "timestamp": "2026-04-11T15:35:29.734Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 862,
+      "timestamp": "2026-04-11T15:35:30.872Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 891,
+      "timestamp": "2026-04-11T15:35:31.925Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 375,
+      "timestamp": "2026-04-11T15:35:32.439Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 846,
+      "timestamp": "2026-04-11T15:35:33.422Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 919,
+      "timestamp": "2026-04-11T15:35:44.484Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 602,
+      "timestamp": "2026-04-11T15:35:45.219Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 720,
+      "timestamp": "2026-04-11T15:35:46.052Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 565,
+      "timestamp": "2026-04-11T15:35:46.737Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 427,
+      "timestamp": "2026-04-11T15:35:47.309Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 682,
+      "timestamp": "2026-04-11T15:35:48.351Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 468,
+      "timestamp": "2026-04-11T15:35:49.129Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 654,
+      "timestamp": "2026-04-11T15:35:49.956Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 744,
+      "timestamp": "2026-04-11T15:35:50.802Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 650,
+      "timestamp": "2026-04-11T15:35:51.566Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 398,
+      "timestamp": "2026-04-11T15:37:38.213Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 441,
+      "timestamp": "2026-04-11T15:37:47.777Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 394,
+      "timestamp": "2026-04-11T15:39:07.391Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 468,
+      "timestamp": "2026-04-11T15:39:07.981Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 733,
+      "timestamp": "2026-04-11T15:39:08.886Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 527,
+      "timestamp": "2026-04-11T15:39:09.555Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 434,
+      "timestamp": "2026-04-11T15:39:10.146Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 459,
+      "timestamp": "2026-04-11T15:39:10.975Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 377,
+      "timestamp": "2026-04-11T15:39:11.466Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 450,
+      "timestamp": "2026-04-11T15:39:12.113Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 383,
+      "timestamp": "2026-04-11T15:39:12.597Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 709,
+      "timestamp": "2026-04-11T15:39:13.409Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 401,
+      "timestamp": "2026-04-11T15:39:21.986Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 439,
+      "timestamp": "2026-04-11T15:40:59.567Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 503,
+      "timestamp": "2026-04-11T15:41:00.203Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 753,
+      "timestamp": "2026-04-11T15:41:01.096Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 518,
+      "timestamp": "2026-04-11T15:41:01.748Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 366,
+      "timestamp": "2026-04-11T15:41:02.220Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 422,
+      "timestamp": "2026-04-11T15:41:02.961Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 389,
+      "timestamp": "2026-04-11T15:41:03.465Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 498,
+      "timestamp": "2026-04-11T15:41:04.207Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 426,
+      "timestamp": "2026-04-11T15:41:04.770Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 751,
+      "timestamp": "2026-04-11T15:41:05.672Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 393,
+      "timestamp": "2026-04-11T15:41:43.020Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 459,
+      "timestamp": "2026-04-11T15:41:43.630Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 694,
+      "timestamp": "2026-04-11T15:41:44.469Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 487,
+      "timestamp": "2026-04-11T15:41:45.091Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 377,
+      "timestamp": "2026-04-11T15:41:45.576Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 434,
+      "timestamp": "2026-04-11T15:41:46.321Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 371,
+      "timestamp": "2026-04-11T15:41:46.886Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 553,
+      "timestamp": "2026-04-11T15:41:47.627Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 391,
+      "timestamp": "2026-04-11T15:41:48.286Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 697,
+      "timestamp": "2026-04-11T15:41:49.136Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 410,
+      "timestamp": "2026-04-11T15:41:57.290Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 391,
+      "timestamp": "2026-04-11T15:42:38.218Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 432,
+      "timestamp": "2026-04-11T15:42:38.755Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1087,
+      "timestamp": "2026-04-11T15:42:39.972Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 508,
+      "timestamp": "2026-04-11T15:42:41.377Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 401,
+      "timestamp": "2026-04-11T15:42:41.969Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 453,
+      "timestamp": "2026-04-11T15:42:42.955Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 374,
+      "timestamp": "2026-04-11T15:42:43.431Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 421,
+      "timestamp": "2026-04-11T15:42:43.967Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 372,
+      "timestamp": "2026-04-11T15:42:44.441Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 695,
+      "timestamp": "2026-04-11T15:42:45.238Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 408,
+      "timestamp": "2026-04-11T15:42:54.472Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 943,
+      "timestamp": "2026-04-11T15:43:31.183Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 4053,
+      "timestamp": "2026-04-11T15:43:36.369Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1479,
+      "timestamp": "2026-04-11T15:43:38.247Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1482,
+      "timestamp": "2026-04-11T15:43:39.915Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1788,
+      "timestamp": "2026-04-11T15:43:42.090Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2440,
+      "timestamp": "2026-04-11T15:43:45.905Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1276,
+      "timestamp": "2026-04-11T15:43:47.653Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2076,
+      "timestamp": "2026-04-11T15:43:49.983Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1419,
+      "timestamp": "2026-04-11T15:43:51.579Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1650,
+      "timestamp": "2026-04-11T15:43:53.355Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 915,
+      "timestamp": "2026-04-11T15:44:04.755Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1021,
+      "timestamp": "2026-04-11T15:44:34.661Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3506,
+      "timestamp": "2026-04-11T15:44:38.417Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1981,
+      "timestamp": "2026-04-11T15:44:41.187Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2190,
+      "timestamp": "2026-04-11T15:44:43.604Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1188,
+      "timestamp": "2026-04-11T15:44:45.084Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1662,
+      "timestamp": "2026-04-11T15:44:47.615Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1292,
+      "timestamp": "2026-04-11T15:44:49.081Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1899,
+      "timestamp": "2026-04-11T15:44:51.602Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1188,
+      "timestamp": "2026-04-11T15:44:52.962Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1412,
+      "timestamp": "2026-04-11T15:44:54.507Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 961,
+      "timestamp": "2026-04-11T15:46:16.538Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1994,
+      "timestamp": "2026-04-11T15:46:18.662Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2049,
+      "timestamp": "2026-04-11T15:46:20.808Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1816,
+      "timestamp": "2026-04-11T15:46:22.888Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 915,
+      "timestamp": "2026-04-11T15:46:23.944Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1945,
+      "timestamp": "2026-04-11T15:46:29.242Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1160,
+      "timestamp": "2026-04-11T15:46:30.558Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1781,
+      "timestamp": "2026-04-11T15:46:32.463Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1245,
+      "timestamp": "2026-04-11T15:46:34.096Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1996,
+      "timestamp": "2026-04-11T15:46:36.563Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 948,
+      "timestamp": "2026-04-11T15:46:39.149Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2403,
+      "timestamp": "2026-04-11T15:46:41.877Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1700,
+      "timestamp": "2026-04-11T15:46:43.907Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1327,
+      "timestamp": "2026-04-11T15:46:45.364Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1676,
+      "timestamp": "2026-04-11T15:46:47.157Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2078,
+      "timestamp": "2026-04-11T15:46:50.192Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 922,
+      "timestamp": "2026-04-11T15:46:51.731Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2272,
+      "timestamp": "2026-04-11T15:46:54.135Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1573,
+      "timestamp": "2026-04-11T15:46:55.849Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1421,
+      "timestamp": "2026-04-11T15:46:57.487Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1329,
+      "timestamp": "2026-04-11T15:47:00.899Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1836,
+      "timestamp": "2026-04-11T15:47:03.319Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1358,
+      "timestamp": "2026-04-11T15:47:04.804Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2299,
+      "timestamp": "2026-04-11T15:47:07.234Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1311,
+      "timestamp": "2026-04-11T15:47:08.780Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2056,
+      "timestamp": "2026-04-11T15:47:11.362Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1364,
+      "timestamp": "2026-04-11T15:47:12.915Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1509,
+      "timestamp": "2026-04-11T15:47:14.648Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 934,
+      "timestamp": "2026-04-11T15:47:16.212Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1392,
+      "timestamp": "2026-04-11T15:47:17.785Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 921,
+      "timestamp": "2026-04-11T15:47:21.295Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1652,
+      "timestamp": "2026-04-11T15:47:23.221Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1779,
+      "timestamp": "2026-04-11T15:47:25.420Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1434,
+      "timestamp": "2026-04-11T15:47:27.088Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1053,
+      "timestamp": "2026-04-11T15:47:28.789Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2555,
+      "timestamp": "2026-04-11T15:47:31.763Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 840,
+      "timestamp": "2026-04-11T15:47:32.842Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2036,
+      "timestamp": "2026-04-11T15:47:35.051Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1066,
+      "timestamp": "2026-04-11T15:47:36.661Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1408,
+      "timestamp": "2026-04-11T15:47:38.212Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1394,
+      "timestamp": "2026-04-11T15:47:41.289Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1959,
+      "timestamp": "2026-04-11T15:47:43.399Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1183,
+      "timestamp": "2026-04-11T15:47:45.149Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2038,
+      "timestamp": "2026-04-11T15:47:47.762Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1309,
+      "timestamp": "2026-04-11T15:47:49.292Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1638,
+      "timestamp": "2026-04-11T15:47:51.520Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1114,
+      "timestamp": "2026-04-11T15:47:52.752Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2414,
+      "timestamp": "2026-04-11T15:47:55.311Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1152,
+      "timestamp": "2026-04-11T15:47:56.720Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1623,
+      "timestamp": "2026-04-11T15:47:58.471Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1197,
+      "timestamp": "2026-04-11T15:48:34.543Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3409,
+      "timestamp": "2026-04-11T15:48:38.727Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1500,
+      "timestamp": "2026-04-11T15:48:40.584Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2030,
+      "timestamp": "2026-04-11T15:48:43.119Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 819,
+      "timestamp": "2026-04-11T15:48:44.063Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1991,
+      "timestamp": "2026-04-11T15:48:46.924Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1207,
+      "timestamp": "2026-04-11T15:48:48.279Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1520,
+      "timestamp": "2026-04-11T15:48:49.922Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1212,
+      "timestamp": "2026-04-11T15:48:51.601Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1502,
+      "timestamp": "2026-04-11T15:48:53.256Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 841,
+      "timestamp": "2026-04-11T15:49:41.706Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 4719,
+      "timestamp": "2026-04-11T15:49:46.620Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1438,
+      "timestamp": "2026-04-11T15:49:48.369Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1645,
+      "timestamp": "2026-04-11T15:49:50.132Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1134,
+      "timestamp": "2026-04-11T15:49:51.422Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1939,
+      "timestamp": "2026-04-11T15:49:53.767Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1465,
+      "timestamp": "2026-04-11T15:49:55.454Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2605,
+      "timestamp": "2026-04-11T15:49:58.205Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1114,
+      "timestamp": "2026-04-11T15:49:59.471Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1524,
+      "timestamp": "2026-04-11T15:50:01.288Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1070,
+      "timestamp": "2026-04-11T15:50:24.309Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1640,
+      "timestamp": "2026-04-11T15:50:26.096Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1567,
+      "timestamp": "2026-04-11T15:50:27.825Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2659,
+      "timestamp": "2026-04-11T15:50:30.801Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 858,
+      "timestamp": "2026-04-11T15:50:31.788Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2320,
+      "timestamp": "2026-04-11T15:50:34.524Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1472,
+      "timestamp": "2026-04-11T15:50:36.317Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1602,
+      "timestamp": "2026-04-11T15:50:38.352Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1111,
+      "timestamp": "2026-04-11T15:50:39.753Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2252,
+      "timestamp": "2026-04-11T15:50:42.251Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1038,
+      "timestamp": "2026-04-11T15:50:45.006Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2616,
+      "timestamp": "2026-04-11T15:50:47.897Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1553,
+      "timestamp": "2026-04-11T15:50:49.605Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2201,
+      "timestamp": "2026-04-11T15:50:51.939Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1340,
+      "timestamp": "2026-04-11T15:50:53.634Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1930,
+      "timestamp": "2026-04-11T15:50:56.144Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1057,
+      "timestamp": "2026-04-11T15:50:57.333Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2085,
+      "timestamp": "2026-04-11T15:50:59.791Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1575,
+      "timestamp": "2026-04-11T15:51:01.515Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1282,
+      "timestamp": "2026-04-11T15:51:03.058Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1283,
+      "timestamp": "2026-04-11T15:51:06.708Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1594,
+      "timestamp": "2026-04-11T15:51:08.444Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1592,
+      "timestamp": "2026-04-11T15:51:10.284Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1925,
+      "timestamp": "2026-04-11T15:51:12.481Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 991,
+      "timestamp": "2026-04-11T15:51:13.950Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1859,
+      "timestamp": "2026-04-11T15:51:16.224Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1167,
+      "timestamp": "2026-04-11T15:51:17.543Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2079,
+      "timestamp": "2026-04-11T15:51:19.771Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 912,
+      "timestamp": "2026-04-11T15:51:20.941Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1558,
+      "timestamp": "2026-04-11T15:51:22.628Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1159,
+      "timestamp": "2026-04-11T15:51:25.719Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1805,
+      "timestamp": "2026-04-11T15:51:28.090Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2029,
+      "timestamp": "2026-04-11T15:51:30.293Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2143,
+      "timestamp": "2026-04-11T15:51:32.586Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 880,
+      "timestamp": "2026-04-11T15:51:33.675Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2632,
+      "timestamp": "2026-04-11T15:51:37.412Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1208,
+      "timestamp": "2026-04-11T15:51:39.115Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2237,
+      "timestamp": "2026-04-11T15:51:41.532Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1500,
+      "timestamp": "2026-04-11T15:51:43.406Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1820,
+      "timestamp": "2026-04-11T15:51:45.613Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1233,
+      "timestamp": "2026-04-11T15:51:48.446Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2330,
+      "timestamp": "2026-04-11T15:51:51.233Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1357,
+      "timestamp": "2026-04-11T15:51:53.000Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1897,
+      "timestamp": "2026-04-11T15:51:55.021Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1613,
+      "timestamp": "2026-04-11T15:51:56.984Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1913,
+      "timestamp": "2026-04-11T15:51:59.743Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 927,
+      "timestamp": "2026-04-11T15:52:00.803Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2531,
+      "timestamp": "2026-04-11T15:52:03.830Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1019,
+      "timestamp": "2026-04-11T15:52:05.083Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1222,
+      "timestamp": "2026-04-11T15:52:06.734Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 819,
+      "timestamp": "2026-04-11T15:55:40.560Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 4502,
+      "timestamp": "2026-04-11T15:55:45.231Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1737,
+      "timestamp": "2026-04-11T15:55:47.384Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1759,
+      "timestamp": "2026-04-11T15:55:49.611Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1132,
+      "timestamp": "2026-04-11T15:55:50.878Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2077,
+      "timestamp": "2026-04-11T15:55:53.690Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1701,
+      "timestamp": "2026-04-11T15:55:55.758Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1977,
+      "timestamp": "2026-04-11T15:55:57.931Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1243,
+      "timestamp": "2026-04-11T15:55:59.770Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1827,
+      "timestamp": "2026-04-11T15:56:01.800Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1269,
+      "timestamp": "2026-04-11T15:56:04.629Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2765,
+      "timestamp": "2026-04-11T15:56:07.732Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1751,
+      "timestamp": "2026-04-11T15:56:09.647Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2227,
+      "timestamp": "2026-04-11T15:56:12.389Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1787,
+      "timestamp": "2026-04-11T15:56:14.583Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1430,
+      "timestamp": "2026-04-11T15:56:16.531Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1278,
+      "timestamp": "2026-04-11T15:56:17.930Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2807,
+      "timestamp": "2026-04-11T15:56:21.007Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1039,
+      "timestamp": "2026-04-11T15:56:22.256Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1342,
+      "timestamp": "2026-04-11T15:56:23.964Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1648,
+      "timestamp": "2026-04-11T15:56:28.039Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1544,
+      "timestamp": "2026-04-11T15:56:29.879Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2054,
+      "timestamp": "2026-04-11T15:56:32.165Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2633,
+      "timestamp": "2026-04-11T15:56:34.998Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1078,
+      "timestamp": "2026-04-11T15:56:36.241Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2151,
+      "timestamp": "2026-04-11T15:56:38.912Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1511,
+      "timestamp": "2026-04-11T15:56:40.843Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1811,
+      "timestamp": "2026-04-11T15:56:42.788Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1371,
+      "timestamp": "2026-04-11T15:56:44.669Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1400,
+      "timestamp": "2026-04-11T15:56:46.443Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 971,
+      "timestamp": "2026-04-11T15:56:49.038Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2392,
+      "timestamp": "2026-04-11T15:56:51.847Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1681,
+      "timestamp": "2026-04-11T15:56:53.751Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1636,
+      "timestamp": "2026-04-11T15:56:55.723Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1441,
+      "timestamp": "2026-04-11T15:56:57.397Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2297,
+      "timestamp": "2026-04-11T15:57:01.125Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 961,
+      "timestamp": "2026-04-11T15:57:02.739Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1966,
+      "timestamp": "2026-04-11T15:57:04.839Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1253,
+      "timestamp": "2026-04-11T15:57:06.266Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1433,
+      "timestamp": "2026-04-11T15:57:07.871Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1344,
+      "timestamp": "2026-04-11T15:57:11.760Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2251,
+      "timestamp": "2026-04-11T15:57:14.184Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1389,
+      "timestamp": "2026-04-11T15:57:15.803Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2262,
+      "timestamp": "2026-04-11T15:57:18.220Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1627,
+      "timestamp": "2026-04-11T15:57:20.201Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2204,
+      "timestamp": "2026-04-11T15:57:22.910Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1177,
+      "timestamp": "2026-04-11T15:57:24.279Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2327,
+      "timestamp": "2026-04-11T15:57:26.870Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1047,
+      "timestamp": "2026-04-11T15:57:28.394Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1579,
+      "timestamp": "2026-04-11T15:57:30.191Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1156,
+      "timestamp": "2026-04-11T15:58:11.627Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2282,
+      "timestamp": "2026-04-11T15:58:14.035Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1784,
+      "timestamp": "2026-04-11T15:58:16.000Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1923,
+      "timestamp": "2026-04-11T15:58:18.082Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1195,
+      "timestamp": "2026-04-11T15:58:19.814Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1951,
+      "timestamp": "2026-04-11T15:58:22.360Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1269,
+      "timestamp": "2026-04-11T15:58:23.876Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2215,
+      "timestamp": "2026-04-11T15:58:26.255Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1186,
+      "timestamp": "2026-04-11T15:58:27.651Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2058,
+      "timestamp": "2026-04-11T15:58:29.842Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1110,
+      "timestamp": "2026-04-11T15:58:33.014Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2432,
+      "timestamp": "2026-04-11T15:58:35.570Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1617,
+      "timestamp": "2026-04-11T15:58:37.334Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2152,
+      "timestamp": "2026-04-11T15:58:40.032Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 911,
+      "timestamp": "2026-04-11T15:58:41.109Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2747,
+      "timestamp": "2026-04-11T15:58:44.345Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1398,
+      "timestamp": "2026-04-11T15:58:46.226Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2731,
+      "timestamp": "2026-04-11T15:58:49.138Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1281,
+      "timestamp": "2026-04-11T15:58:50.950Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1247,
+      "timestamp": "2026-04-11T15:58:52.700Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1398,
+      "timestamp": "2026-04-11T15:58:56.187Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2125,
+      "timestamp": "2026-04-11T15:58:58.935Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1747,
+      "timestamp": "2026-04-11T15:59:00.795Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2037,
+      "timestamp": "2026-04-11T15:59:03.130Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1029,
+      "timestamp": "2026-04-11T15:59:04.825Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2367,
+      "timestamp": "2026-04-11T15:59:07.567Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1093,
+      "timestamp": "2026-04-11T15:59:08.865Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2358,
+      "timestamp": "2026-04-11T15:59:11.862Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1045,
+      "timestamp": "2026-04-11T15:59:13.067Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1580,
+      "timestamp": "2026-04-11T15:59:14.815Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1018,
+      "timestamp": "2026-04-11T15:59:18.279Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2213,
+      "timestamp": "2026-04-11T15:59:20.758Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1865,
+      "timestamp": "2026-04-11T15:59:23.180Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1954,
+      "timestamp": "2026-04-11T15:59:25.596Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2219,
+      "timestamp": "2026-04-11T15:59:28.183Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1669,
+      "timestamp": "2026-04-11T15:59:30.483Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1132,
+      "timestamp": "2026-04-11T15:59:31.979Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2345,
+      "timestamp": "2026-04-11T15:59:34.458Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1319,
+      "timestamp": "2026-04-11T15:59:36.348Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1568,
+      "timestamp": "2026-04-11T15:59:38.146Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1381,
+      "timestamp": "2026-04-11T15:59:42.075Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1999,
+      "timestamp": "2026-04-11T15:59:44.277Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1666,
+      "timestamp": "2026-04-11T15:59:46.145Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2517,
+      "timestamp": "2026-04-11T15:59:49.023Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1119,
+      "timestamp": "2026-04-11T15:59:50.601Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2448,
+      "timestamp": "2026-04-11T15:59:53.448Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1529,
+      "timestamp": "2026-04-11T15:59:55.671Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2041,
+      "timestamp": "2026-04-11T15:59:58.035Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1274,
+      "timestamp": "2026-04-11T15:59:59.456Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1890,
+      "timestamp": "2026-04-11T16:00:01.662Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1311,
+      "timestamp": "2026-04-11T16:00:06.266Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2721,
+      "timestamp": "2026-04-11T16:00:09.161Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1333,
+      "timestamp": "2026-04-11T16:00:10.666Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2475,
+      "timestamp": "2026-04-11T16:00:13.511Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1594,
+      "timestamp": "2026-04-11T16:00:15.408Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1688,
+      "timestamp": "2026-04-11T16:00:17.843Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1288,
+      "timestamp": "2026-04-11T16:00:19.423Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2484,
+      "timestamp": "2026-04-11T16:00:22.060Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1106,
+      "timestamp": "2026-04-11T16:00:23.402Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1486,
+      "timestamp": "2026-04-11T16:00:25.357Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1349,
+      "timestamp": "2026-04-11T16:00:28.832Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1569,
+      "timestamp": "2026-04-11T16:00:30.705Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1486,
+      "timestamp": "2026-04-11T16:00:32.706Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2205,
+      "timestamp": "2026-04-11T16:00:35.365Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1128,
+      "timestamp": "2026-04-11T16:00:36.703Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2494,
+      "timestamp": "2026-04-11T16:00:39.828Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1390,
+      "timestamp": "2026-04-11T16:00:41.525Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1845,
+      "timestamp": "2026-04-11T16:00:43.589Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1152,
+      "timestamp": "2026-04-11T16:00:44.930Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2000,
+      "timestamp": "2026-04-11T16:00:47.213Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 891,
+      "timestamp": "2026-04-11T16:00:49.812Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2805,
+      "timestamp": "2026-04-11T16:00:52.746Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1864,
+      "timestamp": "2026-04-11T16:00:55.118Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1747,
+      "timestamp": "2026-04-11T16:00:57.082Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1812,
+      "timestamp": "2026-04-11T16:00:59.184Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1793,
+      "timestamp": "2026-04-11T16:01:01.497Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 934,
+      "timestamp": "2026-04-11T16:01:02.565Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2088,
+      "timestamp": "2026-04-11T16:01:04.923Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1339,
+      "timestamp": "2026-04-11T16:01:06.730Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1365,
+      "timestamp": "2026-04-11T16:01:08.304Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1178,
+      "timestamp": "2026-04-11T16:01:11.552Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1862,
+      "timestamp": "2026-04-11T16:01:14.505Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1378,
+      "timestamp": "2026-04-11T16:01:16.229Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2067,
+      "timestamp": "2026-04-11T16:01:18.468Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1654,
+      "timestamp": "2026-04-11T16:01:20.746Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3281,
+      "timestamp": "2026-04-11T16:01:24.485Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1382,
+      "timestamp": "2026-04-11T16:01:26.429Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2206,
+      "timestamp": "2026-04-11T16:01:28.824Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1057,
+      "timestamp": "2026-04-11T16:01:30.018Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2755,
+      "timestamp": "2026-04-11T16:01:33.231Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1177,
+      "timestamp": "2026-04-11T16:01:36.645Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2618,
+      "timestamp": "2026-04-11T16:01:39.458Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1620,
+      "timestamp": "2026-04-11T16:01:41.253Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2564,
+      "timestamp": "2026-04-11T16:01:43.998Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1656,
+      "timestamp": "2026-04-11T16:01:46.231Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1963,
+      "timestamp": "2026-04-11T16:01:49.016Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1085,
+      "timestamp": "2026-04-11T16:01:50.249Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2556,
+      "timestamp": "2026-04-11T16:01:53.320Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1079,
+      "timestamp": "2026-04-11T16:01:54.595Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1676,
+      "timestamp": "2026-04-11T16:01:56.435Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1157,
+      "timestamp": "2026-04-11T16:05:45.190Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2179,
+      "timestamp": "2026-04-11T16:05:47.688Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1558,
+      "timestamp": "2026-04-11T16:05:49.686Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2910,
+      "timestamp": "2026-04-11T16:05:52.754Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1149,
+      "timestamp": "2026-04-11T16:05:54.136Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1643,
+      "timestamp": "2026-04-11T16:05:57.164Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1552,
+      "timestamp": "2026-04-11T16:05:58.839Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2197,
+      "timestamp": "2026-04-11T16:06:01.322Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1205,
+      "timestamp": "2026-04-11T16:06:03.590Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1508,
+      "timestamp": "2026-04-11T16:06:06.041Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1165,
+      "timestamp": "2026-04-11T16:06:09.978Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2218,
+      "timestamp": "2026-04-11T16:06:13.000Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2434,
+      "timestamp": "2026-04-11T16:06:16.005Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2235,
+      "timestamp": "2026-04-11T16:06:18.374Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1211,
+      "timestamp": "2026-04-11T16:06:19.726Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3411,
+      "timestamp": "2026-04-11T16:06:24.341Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2180,
+      "timestamp": "2026-04-11T16:06:26.966Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3403,
+      "timestamp": "2026-04-11T16:06:30.946Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2269,
+      "timestamp": "2026-04-11T16:06:33.409Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3094,
+      "timestamp": "2026-04-11T16:06:36.773Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1227,
+      "timestamp": "2026-04-11T16:06:41.352Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3478,
+      "timestamp": "2026-04-11T16:06:45.150Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1418,
+      "timestamp": "2026-04-11T16:06:47.213Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2242,
+      "timestamp": "2026-04-11T16:06:50.151Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1559,
+      "timestamp": "2026-04-11T16:06:51.984Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1936,
+      "timestamp": "2026-04-11T16:06:54.800Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1327,
+      "timestamp": "2026-04-11T16:06:56.419Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2361,
+      "timestamp": "2026-04-11T16:06:58.987Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1180,
+      "timestamp": "2026-04-11T16:07:00.907Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1754,
+      "timestamp": "2026-04-11T16:07:02.909Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1198,
+      "timestamp": "2026-04-11T16:07:09.114Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3875,
+      "timestamp": "2026-04-11T16:07:13.200Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1858,
+      "timestamp": "2026-04-11T16:07:15.881Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2612,
+      "timestamp": "2026-04-11T16:07:18.678Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1416,
+      "timestamp": "2026-04-11T16:07:20.504Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3269,
+      "timestamp": "2026-04-11T16:07:24.664Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1932,
+      "timestamp": "2026-04-11T16:07:26.815Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3877,
+      "timestamp": "2026-04-11T16:07:31.050Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2673,
+      "timestamp": "2026-04-11T16:07:34.000Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3347,
+      "timestamp": "2026-04-11T16:07:37.977Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1812,
+      "timestamp": "2026-04-11T16:07:42.200Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 4650,
+      "timestamp": "2026-04-11T16:07:47.187Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1906,
+      "timestamp": "2026-04-11T16:07:49.346Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3309,
+      "timestamp": "2026-04-11T16:07:53.286Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1439,
+      "timestamp": "2026-04-11T16:07:55.075Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2830,
+      "timestamp": "2026-04-11T16:07:59.168Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1742,
+      "timestamp": "2026-04-11T16:08:01.238Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1848,
+      "timestamp": "2026-04-11T16:08:03.820Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2073,
+      "timestamp": "2026-04-11T16:08:06.095Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2692,
+      "timestamp": "2026-04-11T16:08:09.118Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1406,
+      "timestamp": "2026-04-11T16:08:12.766Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3659,
+      "timestamp": "2026-04-11T16:08:16.964Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1451,
+      "timestamp": "2026-04-11T16:08:18.756Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 4633,
+      "timestamp": "2026-04-11T16:08:23.658Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1180,
+      "timestamp": "2026-04-11T16:08:25.445Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3541,
+      "timestamp": "2026-04-11T16:08:30.003Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1328,
+      "timestamp": "2026-04-11T16:08:31.592Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2537,
+      "timestamp": "2026-04-11T16:08:34.556Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 4097,
+      "timestamp": "2026-04-11T16:08:39.072Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2102,
+      "timestamp": "2026-04-11T16:08:41.451Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1460,
+      "timestamp": "2026-04-11T16:08:45.204Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 3307,
+      "timestamp": "2026-04-11T16:08:48.858Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1546,
+      "timestamp": "2026-04-11T16:08:50.570Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2425,
+      "timestamp": "2026-04-11T16:08:53.502Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1446,
+      "timestamp": "2026-04-11T16:08:55.375Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2027,
+      "timestamp": "2026-04-11T16:08:58.269Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1697,
+      "timestamp": "2026-04-11T16:09:00.144Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2421,
+      "timestamp": "2026-04-11T16:09:02.777Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 960,
+      "timestamp": "2026-04-11T16:09:03.979Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2374,
+      "timestamp": "2026-04-11T16:09:06.651Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 934,
+      "timestamp": "2026-04-11T16:09:10.222Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2738,
+      "timestamp": "2026-04-11T16:09:13.118Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1641,
+      "timestamp": "2026-04-11T16:09:15.031Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2186,
+      "timestamp": "2026-04-11T16:09:17.428Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1560,
+      "timestamp": "2026-04-11T16:09:19.196Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1946,
+      "timestamp": "2026-04-11T16:09:21.779Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1144,
+      "timestamp": "2026-04-11T16:09:23.409Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2379,
+      "timestamp": "2026-04-11T16:09:26.076Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1200,
+      "timestamp": "2026-04-11T16:09:27.460Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1243,
+      "timestamp": "2026-04-11T16:09:28.972Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1284,
+      "timestamp": "2026-04-11T16:09:32.716Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2083,
+      "timestamp": "2026-04-11T16:09:35.290Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2306,
+      "timestamp": "2026-04-11T16:09:38.220Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2471,
+      "timestamp": "2026-04-11T16:09:40.945Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1042,
+      "timestamp": "2026-04-11T16:09:42.147Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 3012,
+      "timestamp": "2026-04-11T16:09:45.580Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1668,
+      "timestamp": "2026-04-11T16:09:47.751Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 1874,
+      "timestamp": "2026-04-11T16:09:50.000Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1565,
+      "timestamp": "2026-04-11T16:09:51.884Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1695,
+      "timestamp": "2026-04-11T16:09:53.906Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "bug_fix",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 879,
+      "timestamp": "2026-04-11T16:09:56.635Z",
+      "error": null
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2361,
+      "timestamp": "2026-04-11T16:09:59.254Z",
+      "error": null
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2006,
+      "timestamp": "2026-04-11T16:10:01.948Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "documentation",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2026,
+      "timestamp": "2026-04-11T16:10:04.130Z",
+      "error": null
+    },
+    {
+      "workflow": "testing",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1209,
+      "timestamp": "2026-04-11T16:10:05.572Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 2245,
+      "timestamp": "2026-04-11T16:10:08.723Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1029,
+      "timestamp": "2026-04-11T16:10:09.932Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "feature",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 2243,
+      "timestamp": "2026-04-11T16:10:12.576Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1250,
+      "timestamp": "2026-04-11T16:10:14.046Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "refactor",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 1678,
+      "timestamp": "2026-04-11T16:10:15.840Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 8078,
+      "timestamp": "2026-04-12T00:33:54.397Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": false,
+      "execution_time": 8532,
+      "timestamp": "2026-04-12T00:35:52.102Z",
+      "error": "部分任务失败"
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9023,
+      "timestamp": "2026-04-12T00:42:00.197Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9522,
+      "timestamp": "2026-04-12T00:42:24.239Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9761,
+      "timestamp": "2026-04-12T00:43:25.563Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T00:43:25.564Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9656,
+      "timestamp": "2026-04-12T00:43:49.071Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T00:43:49.072Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9414,
+      "timestamp": "2026-04-12T01:43:49.948Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T01:43:49.951Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 8362,
+      "timestamp": "2026-04-12T02:02:03.381Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:02:03.383Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9414,
+      "timestamp": "2026-04-12T02:05:35.343Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:05:35.345Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9908,
+      "timestamp": "2026-04-12T02:05:57.420Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:05:57.424Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9681,
+      "timestamp": "2026-04-12T02:08:11.488Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:08:11.490Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9051,
+      "timestamp": "2026-04-12T02:11:00.301Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:11:00.304Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10365,
+      "timestamp": "2026-04-12T02:16:09.114Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:16:09.117Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10475,
+      "timestamp": "2026-04-12T02:22:17.807Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:22:17.808Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9850,
+      "timestamp": "2026-04-12T02:36:40.951Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:36:40.954Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9440,
+      "timestamp": "2026-04-12T02:41:21.467Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:41:21.469Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 8475,
+      "timestamp": "2026-04-12T02:51:04.265Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T02:51:04.266Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9083,
+      "timestamp": "2026-04-12T03:11:18.980Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:11:18.981Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9122,
+      "timestamp": "2026-04-12T03:14:52.370Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:14:52.372Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 7897,
+      "timestamp": "2026-04-12T03:16:51.942Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:16:51.944Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 8742,
+      "timestamp": "2026-04-12T03:26:26.190Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:26:26.192Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9029,
+      "timestamp": "2026-04-12T03:33:51.824Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:33:51.825Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10647,
+      "timestamp": "2026-04-12T03:42:17.828Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:42:17.829Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9535,
+      "timestamp": "2026-04-12T03:45:11.046Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:45:11.048Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10011,
+      "timestamp": "2026-04-12T03:46:51.343Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:46:51.345Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10387,
+      "timestamp": "2026-04-12T03:50:13.157Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:50:13.158Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10187,
+      "timestamp": "2026-04-12T03:55:39.815Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T03:55:39.816Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9866,
+      "timestamp": "2026-04-12T04:06:55.129Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T04:06:55.131Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9759,
+      "timestamp": "2026-04-12T04:26:46.610Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T04:26:46.611Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 9940,
+      "timestamp": "2026-04-12T05:15:23.032Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T05:15:23.035Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10282,
+      "timestamp": "2026-04-12T05:43:38.716Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T05:43:38.718Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 12005,
+      "timestamp": "2026-04-12T05:46:43.397Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T05:46:43.399Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10712,
+      "timestamp": "2026-04-12T06:29:03.101Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T06:29:03.104Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 11513,
+      "timestamp": "2026-04-12T06:59:02.015Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T06:59:02.016Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "full_workflow",
+      "success": true,
+      "execution_time": 10689,
+      "timestamp": "2026-04-12T07:02:29.812Z",
+      "error": null
+    },
+    {
+      "workflow": "general",
+      "step": "rework_pattern",
+      "success": true,
+      "timestamp": "2026-04-12T07:02:29.815Z",
+      "error": null
+    }
+  ],
+  "aggregated": {
+    "by_workflow": {},
+    "by_step": {},
+    "by_day": {}
+  }
+}

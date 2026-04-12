@@ -1,0 +1,9 @@
+node_modules/
+.flowharness/logs/
+.flowharness/audit/
+.flowharness/metrics/
+.flowharness/sandboxes/
+.flowharness/test-sandboxes/
+*.log
+.DS_Store
+.claude/

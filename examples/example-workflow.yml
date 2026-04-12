@@ -1,0 +1,41 @@
+name: "example-ci"
+description: "示例 CI/CD 工作流"
+trigger: "on_push"
+enabled: true
+
+steps:
+  # 1. 代码检查
+  - type: "check"
+    name: "lint"
+    action: "lint"
+
+  # 2. 运行测试
+  - type: "run"
+    name: "unit_tests"
+    command: "npm test"
+
+  # 3. 检查覆盖率
+  - type: "check"
+    name: "coverage"
+    threshold: 80
+
+  # 4. 构建
+  - type: "run"
+    name: "build"
+    command: "npm run build"
+
+  # 5. 部署到 staging
+  - type: "sandbox"
+    name: "staging_deploy"
+    environment: "staging"
+
+  # 6. 等待批准
+  - type: "require"
+    name: "production_approval"
+    approvers: ["admin", "lead"]
+    timeout: 7200
+
+  # 7. 部署到生产
+  - type: "execute"
+    name: "production_deploy"
+    command: "npm run deploy:prod"
