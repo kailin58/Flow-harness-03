@@ -154,6 +154,46 @@ async function testCICDIntegration() {
     assert(stats.qualityGates === 3, '3 个质量门禁');
     assert(stats.customSteps === 2, '2 个自定义步骤');
 
+    // ---- Test 17: GitLab CI 生成 ----
+    console.log('\nTest 17: GitLab CI 生成');
+    const gitlabResult = ci.generateGitLabCI({ nodeVersion: '20' });
+    assert(typeof gitlabResult.content === 'string', 'GitLab CI content 是字符串');
+    assert(gitlabResult.path.endsWith('.gitlab-ci.yml'), '路径为 .gitlab-ci.yml');
+    assert(gitlabResult.content.includes('stages:'), '包含 stages');
+    assert(gitlabResult.content.includes('image:') && gitlabResult.content.includes('node:20'), '包含 Node 镜像');
+    assert(gitlabResult.content.includes('npm test'), '包含 npm test');
+    assert(gitlabResult.content.includes('deploy-dev'), '包含 dev 部署 job');
+    assert(gitlabResult.content.includes('deploy-production'), '包含 production 部署 job');
+
+    // ---- Test 18: Jenkinsfile 生成 ----
+    console.log('\nTest 18: Jenkinsfile 生成');
+    const jenkinsResult = ci.generateJenkinsfile({ nodeVersion: '20' });
+    assert(typeof jenkinsResult.content === 'string', 'Jenkinsfile content 是字符串');
+    assert(jenkinsResult.path.endsWith('Jenkinsfile'), '路径为 Jenkinsfile');
+    assert(jenkinsResult.content.includes('pipeline {'), '包含 pipeline 块');
+    assert(jenkinsResult.content.includes('nodejs'), '包含 nodejs 工具');
+    assert(jenkinsResult.content.includes("stage('Test')"), '包含 Test stage');
+    assert(jenkinsResult.content.includes("stage('Deploy to dev')"), '包含 dev 部署 stage');
+    assert(jenkinsResult.content.includes("stage('Deploy to production')"), '包含 production 部署 stage');
+    assert(jenkinsResult.content.includes('input {'), 'production 有审批输入');
+
+    // ---- Test 19: generateForPlatform ----
+    console.log('\nTest 19: generateForPlatform');
+    const ghResult = ci.generateForPlatform('github', { nodeVersion: '18' });
+    assert(ghResult.path.endsWith('ci.yml'), 'GitHub 平台生成 ci.yml');
+    const glResult = ci.generateForPlatform('gitlab', { nodeVersion: '18' });
+    assert(glResult.path.endsWith('.gitlab-ci.yml'), 'GitLab 平台生成 .gitlab-ci.yml');
+    const jkResult = ci.generateForPlatform('jenkins', { nodeVersion: '18' });
+    assert(jkResult.path.endsWith('Jenkinsfile'), 'Jenkins 平台生成 Jenkinsfile');
+
+    // ---- Test 20: generateAllPlatforms ----
+    console.log('\nTest 20: generateAllPlatforms');
+    const allPlatforms = ci.generateAllPlatforms({ nodeVersion: '18' });
+    assert(allPlatforms.length === 3, '生成 3 个平台配置');
+    assert(allPlatforms.some(p => p.platform === 'github'), '包含 GitHub');
+    assert(allPlatforms.some(p => p.platform === 'gitlab'), '包含 GitLab');
+    assert(allPlatforms.some(p => p.platform === 'jenkins'), '包含 Jenkins');
+
   } catch (error) {
     console.log(`\n❌ 测试异常: ${error.message}`);
     console.log(error.stack);

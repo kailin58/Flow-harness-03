@@ -1,0 +1,337 @@
+openapi: 3.0.3
+info:
+  title: ACmodus API
+  version: 1.0.0
+  description: Minimal OpenAPI for E1/E5/E6.
+security:
+  - bearerAuth: []
+servers:
+  - url: /api/v1
+tags:
+  - name: App-商城
+  - name: App-分销
+  - name: App-积分
+paths:
+  /app/orders:
+    post:
+      tags: [App-商城]
+      summary: 创建订单
+      operationId: createOrder
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResponse'
+        '409':
+          description: 幂等冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: 请求过载，触发限流
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: 客户端建议重试秒数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: 服务降级或熔断中
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '504':
+          description: 上游超时
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /app/orders/{orderId}:
+    get:
+      tags: [App-商城]
+      summary: 查询订单详情
+      operationId: getOrderDetail
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailResponse'
+        '404':
+          description: 订单不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /app/payments/callback:
+    post:
+      tags: [App-商城]
+      summary: 支付回调
+      operationId: paymentCallback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payment_order_id, payment_status]
+              properties:
+                payment_order_id:
+                  type: string
+                payment_status:
+                  type: string
+                  enum: [SUCCESS, FAILED]
+      responses:
+        '200':
+          description: 回调受理成功
+        '404':
+          description: 支付单不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /app/promoter/commissions/summary:
+    get:
+      tags: [App-分销]
+      summary: 推广员佣金汇总
+      operationId: getPromoterCommissionSummary
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommissionSummaryResponse'
+
+  /app/member/points/ledger:
+    get:
+      tags: [App-积分]
+      summary: 积分流水
+      operationId: getPointsLedger
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsLedgerPageResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message, trace_id]
+      properties:
+        code:
+          type: string
+          example: BIZ-422-RULE_REJECTED
+        message:
+          type: string
+          example: 当前订单不满足积分抵现规则
+        trace_id:
+          type: string
+          example: trc_20260408_xxx
+        details:
+          type: object
+          additionalProperties: true
+
+    CreateOrderRequest:
+      type: object
+      required: [address_id, items]
+      properties:
+        address_id:
+          type: integer
+          example: 10086
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/OrderItemInput'
+        coupon_ids:
+          type: array
+          items:
+            type: integer
+        points_to_use:
+          type: integer
+          minimum: 0
+          example: 1200
+
+    OrderItemInput:
+      type: object
+      required: [sku_id, qty]
+      properties:
+        sku_id:
+          type: integer
+          example: 20001
+        qty:
+          type: integer
+          minimum: 1
+          example: 2
+
+    CreateOrderResponse:
+      type: object
+      required: [order_id, payment_order_id, amount_payable, price_snapshot_id]
+      properties:
+        order_id:
+          type: string
+          example: O202604080001
+        payment_order_id:
+          type: string
+          example: P202604080001
+        amount_payable:
+          type: number
+          format: double
+          example: 199.00
+        price_snapshot_id:
+          type: string
+          example: PS_20260408_0001
+        expire_at:
+          type: string
+          format: date-time
+
+    OrderDetailResponse:
+      type: object
+      required: [order_id, status, amount_payable, items]
+      properties:
+        order_id:
+          type: string
+        status:
+          type: string
+          example: PAID
+        amount_payable:
+          type: number
+          format: double
+        promoter_user_id:
+          type: integer
+          nullable: true
+        points_redeemed:
+          type: integer
+          example: 1200
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku_id:
+                type: integer
+              qty:
+                type: integer
+              unit_price:
+                type: number
+                format: double
+
+    CommissionSummaryResponse:
+      type: object
+      required: [promoter_user_id, pending_amount, settled_amount, reversed_amount]
+      properties:
+        promoter_user_id:
+          type: integer
+          example: 90001
+        pending_amount:
+          type: number
+          format: double
+          example: 1234.56
+        settled_amount:
+          type: number
+          format: double
+          example: 987.65
+        reversed_amount:
+          type: number
+          format: double
+          example: 12.34
+
+    PointsLedgerRecord:
+      type: object
+      required: [member_id, change_type, change_amount, balance_after, ref_type, ref_id, trace_id]
+      properties:
+        member_id:
+          type: integer
+          example: 80001
+        change_type:
+          type: string
+          example: CONSUMPTION_EARN
+        change_amount:
+          type: integer
+          example: 120
+        balance_after:
+          type: integer
+          example: 5320
+        ref_type:
+          type: string
+          example: ORDER_CONFIRM
+        ref_id:
+          type: string
+          example: O202604080001
+        expired_at:
+          type: string
+          format: date
+          nullable: true
+        trace_id:
+          type: string
+          example: trc_20260408_xxx
+
+    PointsLedgerPageResponse:
+      type: object
+      required: [page, size, total, records]
+      properties:
+        page:
+          type: integer
+          example: 1
+        size:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 236
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PointsLedgerRecord'

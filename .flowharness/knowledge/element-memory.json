@@ -1,0 +1,96 @@
+{
+  "baidu.com:searchButton": {
+    "domain": "baidu.com",
+    "elementKey": "searchButton",
+    "position": {
+      "x": 907.2000122070312,
+      "y": 236.8000030517578,
+      "width": 108,
+      "height": 44.00001525878906
+    },
+    "selectors": [
+      "#su",
+      "input[type=\"submit\"]"
+    ],
+    "lastSeen": 1776015189567,
+    "successCount": 1,
+    "failCount": 0,
+    "accuracy": 1
+  },
+  "taobao.com:input:搜索": {
+    "domain": "taobao.com",
+    "elementKey": "input:搜索",
+    "position": {
+      "x": 427.9624938964844,
+      "y": 11.600000381469727,
+      "width": 627.2375793457031,
+      "height": 34.00000190734863
+    },
+    "selectors": [
+      "#q",
+      "input.s_ipt",
+      "#J_TSearchForm input"
+    ],
+    "lastSeen": 1776016185837,
+    "successCount": 1,
+    "failCount": 0,
+    "accuracy": 1
+  },
+  "taobao.com:searchButton": {
+    "domain": "taobao.com",
+    "elementKey": "searchButton",
+    "position": {
+      "x": 990.2387205916816,
+      "y": 11.55286769567747,
+      "width": 72,
+      "height": 36
+    },
+    "selectors": [
+      ".btn-search",
+      "#J_TSearchForm button",
+      "button.btn-search"
+    ],
+    "lastSeen": 1776016186523,
+    "successCount": 1,
+    "failCount": 0,
+    "accuracy": 1
+  },
+  "jd.com:input:搜索": {
+    "domain": "jd.com",
+    "elementKey": "input:搜索",
+    "position": {
+      "x": 400.6000061035156,
+      "y": -71.4000015258789,
+      "width": 557.6000061035156,
+      "height": 36
+    },
+    "selectors": [
+      "#key",
+      "#search input",
+      "input.text"
+    ],
+    "lastSeen": 1776016219274,
+    "successCount": 1,
+    "failCount": 0,
+    "accuracy": 1
+  },
+  "jd.com:searchButton": {
+    "domain": "jd.com",
+    "elementKey": "searchButton",
+    "position": {
+      "x": 999.0539025004757,
+      "y": -73.65570044329573,
+      "width": 80,
+      "height": 38
+    },
+    "selectors": [
+      "#search button",
+      ".search-btn",
+      "button.button"
+    ],
+    "lastSeen": 1776016220249,
+    "successCount": 1,
+    "failCount": 0,
+    "accuracy": 1
+  }
+}

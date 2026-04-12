@@ -457,6 +457,54 @@ class ReviewLoop {
           );
         }
 
+        // ── 持久化高价值优化策略到知识库 patterns ─────────────────
+        // 当 memoryStore 不可用时，策略通过此路径写入 knowledge base
+        if (validation.feasible && optimizations.length > 0 && !this.memoryStore) {
+          for (const opt of optimizations) {
+            if (opt.priority === 'critical' || opt.priority === 'high') {
+              const patternKey = `strategy_${opt.type}_${analysis?.taskType || 'general'}`;
+              const pattern = {
+                pattern: patternKey,
+                type: opt.type,
+                category: opt.category,
+                suggestion: opt.suggestion,
+                expectedImprovement: opt.expectedImprovement,
+                confidence: validation.confidence,
+                taskType: analysis?.taskType,
+                createdAt: new Date().toISOString()
+              };
+              // 写入知识库 patterns（recordPattern 或直接追加）
+              if (typeof this.knowledgeBase.recordPattern === 'function') {
+                this.knowledgeBase.recordPattern(patternKey, pattern);
+              } else if (this.knowledgeBase.patterns) {
+                if (!this.knowledgeBase.patterns.optimization_strategies) {
+                  this.knowledgeBase.patterns.optimization_strategies = [];
+                }
+                // 覆盖同类策略或追加
+                const idx = this.knowledgeBase.patterns.optimization_strategies
+                  .findIndex(p => p.pattern === patternKey);
+                if (idx >= 0) {
+                  this.knowledgeBase.patterns.optimization_strategies[idx] = pattern;
+                } else {
+                  this.knowledgeBase.patterns.optimization_strategies.push(pattern);
+                }
+              }
+              consolidation.newStrategies.push(patternKey);
+            }
+          }
+          // 持久化到磁盘
+          if (typeof this.knowledgeBase.save === 'function') {
+            this.knowledgeBase.save();
+          }
+          if (consolidation.newStrategies.length > 0) {
+            this.logger.info(
+              { strategies: consolidation.newStrategies.length },
+              'Optimization strategies persisted to knowledge base'
+            );
+          }
+        }
+        // ─────────────────────────────────────────────────────────
+
         consolidation.savedToKnowledgeBase = true;
         this.logger.info('Learnings saved to knowledge base');
       } catch (error) {

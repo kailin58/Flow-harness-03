@@ -39,26 +39,15 @@ class TaskDispatcher {
     // 使用 AgentRegistry 匹配最佳 Agent
     const agent = this.agentRegistry.matchBestAgent(subtask);
 
-    if (!agent) {
-      // 如果没有匹配的 Agent，使用默认的 General-Purpose Agent
-      const defaultAgent = this.agentRegistry.get('general');
-      return {
-        name: defaultAgent.name,
-        capabilities: defaultAgent.capabilities || [],
-        mode: this.determineExecutionMode(subtask),
-        config: this.getExecutorConfig(subtask)
-      };
-    }
+    const resolved = agent || this.agentRegistry.get('general');
 
-    // 返回匹配的 Agent 信息
-    const executor = {
-      name: agent.name,
-      capabilities: agent.capabilities || [],
+    return {
+      agentId: resolved.id,
+      name: resolved.name,
+      capabilities: resolved.capabilities || [],
       mode: this.determineExecutionMode(subtask),
       config: this.getExecutorConfig(subtask)
     };
-
-    return executor;
   }
 
   /**
@@ -95,31 +84,80 @@ class TaskDispatcher {
 
   /**
    * 创建执行计划
+   * 输出：phases 数组，每个 phase 内的任务可并行，phase 之间串行
    */
   createExecutionPlan(assignments) {
-    // 分析依赖关系，确定执行顺序
-    const plan = {
-      sequential: [],
-      parallel: []
+    // subtask.type → phase（与 task-decomposer 保持一致）
+    const PHASE_MAP = {
+      explore: 0, analyze: 0, search: 0, research: 0, web_search: 0, doc_lookup: 0,
+      plan: 1, design: 1,
+      code: 2, write: 2, implement: 2, execute: 2, refactor: 2,
+      test: 3, review: 3, inspect: 3, verify: 3
     };
 
-    // 找出可以并行执行的任务
-    const noDependencies = assignments.filter(a =>
-      !a.subtask.dependencies || a.subtask.dependencies.length === 0
-    );
+    const getPhase = (subtask) => PHASE_MAP[subtask.type] ?? 2;
 
-    if (noDependencies.length > 1) {
-      plan.parallel.push(noDependencies.map(a => a.subtask.id));
+    // 按阶段分组（preserving insertion order for same phase）
+    const phaseMap = new Map();
+    for (const a of assignments) {
+      const ph = getPhase(a.subtask);
+      if (!phaseMap.has(ph)) phaseMap.set(ph, []);
+      phaseMap.get(ph).push(a.subtask.id);
     }
 
-    // 其他任务按顺序执行
-    const sequential = assignments.filter(a =>
-      a.subtask.dependencies && a.subtask.dependencies.length > 0
+    const sortedPhaseKeys = [...phaseMap.keys()].sort((a, b) => a - b);
+
+    // phases: 有序阶段列表，每阶段内任务可并行
+    const phases = sortedPhaseKeys.map(ph => ({
+      phase: ph,
+      tasks: phaseMap.get(ph)
+    }));
+
+    // 向后兼容：保留 sequential / parallel 的原始语义
+    // parallel: 没有依赖的任务，当数量 > 1 时可组成并行组
+    const noDeps = assignments.filter(a =>
+      !a.subtask.dependencies || a.subtask.dependencies.length === 0
     );
+    const parallel = noDeps.length > 1 ? [noDeps.map(a => a.subtask.id)] : [];
 
-    plan.sequential = sequential.map(a => a.subtask.id);
+    // sequential: 有依赖的任务，按顺序执行
+    const sequential = assignments
+      .filter(a => a.subtask.dependencies && a.subtask.dependencies.length > 0)
+      .map(a => a.subtask.id);
 
-    return plan;
+    return { phases, parallel, sequential };
+  }
+
+  /**
+   * 用匹配的技能上下文丰富任务对象
+   * @param {Object} task - 任务对象
+   * @param {string} agentRole - Agent 角色 (explore/plan/general/inspector)
+   * @param {Object} skillLoader - SkillLoader 实例
+   * @returns {Object} 增强后的任务对象
+   */
+  async enrichTaskWithSkills(task, agentRole, skillLoader) {
+    if (!skillLoader) {
+      return task;
+    }
+
+    try {
+      const matchedSkills = await skillLoader.matchSkills(
+        agentRole,
+        task.description || task.name || ''
+      );
+
+      if (matchedSkills.length > 0) {
+        task.skillContext = matchedSkills.map((skill) => ({
+          id: skill.id,
+          name: skill.name,
+          guidance: skill.content
+        }));
+      }
+    } catch (error) {
+      // 技能匹配失败不阻塞主流程
+    }
+
+    return task;
   }
 }
 

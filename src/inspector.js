@@ -34,13 +34,30 @@ class Inspector {
   async inspect(execution, analysis, context = {}) {
     this.logger.info('Inspector 深度检查');
 
+    // 并行执行所有独立检查以提高性能
+    const [
+      goalAlignment,
+      specCompliance,
+      semanticCorrectness,
+      impactAnalysis,
+      securityScan,
+      agentsCompliance
+    ] = await Promise.all([
+      this.checkGoalAlignment(execution, analysis, context),
+      this.checkSpecCompliance(execution, analysis, context),
+      this.checkSemanticCorrectness(execution, analysis, context),
+      this.analyzeImpact(execution, analysis, context),
+      this.scanSecurity(execution, analysis, context),
+      this.checkAgentsCompliance(execution, analysis, context)
+    ]);
+
     const checks = {
-      goalAlignment: await this.checkGoalAlignment(execution, analysis, context),
-      specCompliance: await this.checkSpecCompliance(execution, analysis, context),
-      semanticCorrectness: await this.checkSemanticCorrectness(execution, analysis, context),
-      impactAnalysis: await this.analyzeImpact(execution, analysis, context),
-      securityScan: await this.scanSecurity(execution, analysis, context),
-      agentsCompliance: await this.checkAgentsCompliance(execution, analysis, context)
+      goalAlignment,
+      specCompliance,
+      semanticCorrectness,
+      impactAnalysis,
+      securityScan,
+      agentsCompliance
     };
 
     // 计算总体通过率
@@ -143,7 +160,7 @@ class Inspector {
     };
 
     // 检查是否涉及核心系统
-    const involvesCore = analysis.risks.some(r => r.type === 'core_system');
+    const involvesCore = (analysis.risks || []).some(r => r.type === 'core_system');
     check.details.involvesCore = involvesCore;
 
     if (involvesCore) {
@@ -202,7 +219,7 @@ class Inspector {
 
     // 检查是否有测试任务
     const hasTestTask = execution.results.some(r =>
-      r.subtask.includes('测试') || r.subtask.includes('验证') || r.subtask.includes('test')
+      (r.subtask || '').includes('测试') || (r.subtask || '').includes('验证') || (r.subtask || '').includes('test')
     );
 
     check.details.hasTestTask = hasTestTask;
@@ -210,7 +227,7 @@ class Inspector {
     if (hasTestTask) {
       // 检查测试是否通过
       const testTasks = execution.results.filter(r =>
-        r.subtask.includes('测试') || r.subtask.includes('验证') || r.subtask.includes('test')
+        (r.subtask || '').includes('测试') || (r.subtask || '').includes('验证') || (r.subtask || '').includes('test')
       );
 
       const passedTests = testTasks.filter(t => t.success).length;
@@ -234,7 +251,7 @@ class Inspector {
     // 检查业务逻辑关键词
     const businessLogicKeywords = ['支付', '积分', '佣金', '权限', '认证', '计算'];
     const involvesBusinessLogic = businessLogicKeywords.some(kw =>
-      analysis.goal.description.includes(kw)
+      (analysis.goal?.description || '').includes(kw)
     );
 
     check.details.involvesBusinessLogic = involvesBusinessLogic;
@@ -308,7 +325,7 @@ class Inspector {
     // 检查是否涉及安全相关功能
     const securityKeywords = ['密码', '权限', '认证', '鉴权', '加密', 'token', 'session'];
     const involvesSecurity = securityKeywords.some(kw =>
-      analysis.goal.description.toLowerCase().includes(kw)
+      (analysis.goal?.description || '').toLowerCase().includes(kw)
     );
 
     check.details.involvesSecurity = involvesSecurity;
@@ -492,14 +509,14 @@ class Inspector {
     // 对于文档类任务，只要有编写任务完成即可
     if (expectedOutputs.includes('文档')) {
       return execution.results.some(r =>
-        r.success && (r.subtask.includes('文档') || r.subtask.includes('编写') || r.subtask.includes('内容'))
+        r.success && ((r.subtask || '').includes('文档') || (r.subtask || '').includes('编写') || (r.subtask || '').includes('内容'))
       );
     }
 
     // 对于其他任务，检查是否有匹配的输出
     return expectedOutputs.some(output =>
       execution.results.some(r =>
-        r.success && (r.subtask.includes(output) || r.output?.includes(output))
+        r.success && ((r.subtask || '').includes(output) || r.output?.includes(output))
       )
     );
   }

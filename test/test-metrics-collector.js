@@ -185,6 +185,84 @@ async function testMetricsCollector() {
     assert(emptyProm.includes('empty_empty_counter'), '空指标出现在输出中');
     assert(emptyProm.includes('0'), '空 counter 默认值 0');
 
+    // ---- Test 19: HTTP Endpoint 启动 ----
+    console.log('\nTest 19: HTTP Endpoint 启动');
+    const http = require('http');
+    const mcHttp = new MetricsCollector({ prefix: 'http_test', logger: silentLogger });
+    mcHttp.registerCounter('http_requests', 'HTTP requests');
+    mcHttp.inc('http_test_http_requests', { path: '/api' }, 10);
+
+    const server = await mcHttp.startHTTPEndpoint({ port: 0 }); // 随机端口
+    assert(server !== null, 'HTTP server 创建成功');
+    assert(mcHttp.isHTTPEndpointRunning() === true, 'isHTTPEndpointRunning = true');
+
+    const addr = mcHttp.getHTTPEndpointAddress();
+    assert(addr !== null, 'getHTTPEndpointAddress 返回非 null');
+    assert(typeof addr.port === 'number', 'port 是数字');
+    assert(addr.address !== undefined, 'address 存在');
+
+    // ---- Test 20: HTTP Endpoint /metrics 响应 ----
+    console.log('\nTest 20: HTTP Endpoint /metrics 响应');
+    const metricsUrl = `http://127.0.0.1:${addr.port}/metrics`;
+    const metricsResponse = await new Promise((resolve, reject) => {
+      http.get(metricsUrl, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, data }));
+      }).on('error', reject);
+    });
+    assert(metricsResponse.status === 200, '/metrics 返回 200');
+    assert(metricsResponse.headers['content-type'].includes('text/plain'), 'Content-Type 是 text/plain');
+    assert(metricsResponse.data.includes('# HELP'), '响应包含 Prometheus 格式');
+    assert(metricsResponse.data.includes('http_test_http_requests'), '响应包含自定义指标');
+
+    // ---- Test 21: HTTP Endpoint /health 响应 ----
+    console.log('\nTest 21: HTTP Endpoint /health 响应');
+    const healthUrl = `http://127.0.0.1:${addr.port}/health`;
+    const healthResponse = await new Promise((resolve, reject) => {
+      http.get(healthUrl, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve({ status: res.statusCode, data }));
+      }).on('error', reject);
+    });
+    assert(healthResponse.status === 200, '/health 返回 200');
+    const healthData = JSON.parse(healthResponse.data);
+    assert(healthData.status === 'ok', 'health status = ok');
+    assert(healthData.timestamp !== undefined, '有 timestamp');
+
+    // ---- Test 22: HTTP Endpoint /stats 响应 ----
+    console.log('\nTest 22: HTTP Endpoint /stats 响应');
+    const statsUrl = `http://127.0.0.1:${addr.port}/stats`;
+    const statsResponse = await new Promise((resolve, reject) => {
+      http.get(statsUrl, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve({ status: res.statusCode, data }));
+      }).on('error', reject);
+    });
+    assert(statsResponse.status === 200, '/stats 返回 200');
+    const statsData = JSON.parse(statsResponse.data);
+    assert(statsData.stats !== undefined, '有 stats 对象');
+    assert(Array.isArray(statsData.metrics), 'metrics 是数组');
+
+    // ---- Test 23: HTTP Endpoint 404 ----
+    console.log('\nTest 23: HTTP Endpoint 404');
+    const notFoundUrl = `http://127.0.0.1:${addr.port}/nonexistent`;
+    const notFoundResponse = await new Promise((resolve, reject) => {
+      http.get(notFoundUrl, (res) => {
+        res.on('data', () => {});
+        res.on('end', () => resolve({ status: res.statusCode }));
+      }).on('error', reject);
+    });
+    assert(notFoundResponse.status === 404, '未知路径返回 404');
+
+    // ---- Test 24: HTTP Endpoint 停止 ----
+    console.log('\nTest 24: HTTP Endpoint 停止');
+    await mcHttp.stopHTTPEndpoint();
+    assert(mcHttp.isHTTPEndpointRunning() === false, '停止后 isHTTPEndpointRunning = false');
+    assert(mcHttp.getHTTPEndpointAddress() === null, '停止后 getHTTPEndpointAddress = null');
+
   } catch (error) {
     console.log(`\n❌ 测试异常: ${error.message}`);
     console.log(error.stack);

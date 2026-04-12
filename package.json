@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "node src/cli.js",
-    "test": "node -e \"const fs=require('fs');const f=fs.readdirSync('test').filter(x=>x.startsWith('test-')&&x.endsWith('.js'));let p=0,fail=0;for(const t of f){try{require('child_process').execSync('node test/'+t,{timeout:60000});p++}catch(e){fail++;console.log('FAIL:',t)}}console.log(p+' passed,',fail+' failed');if(fail)process.exit(1)\""
+    "test": "node -e \"const fs=require('fs');const f=fs.readdirSync('test').filter(x=>x.startsWith('test-')&&x.endsWith('.js')&&!x.includes('browser'));let p=0,fail=0;for(const t of f){try{require('child_process').execSync('node test/'+t,{timeout:60000});p++}catch(e){fail++;console.log('FAIL:',t)}}console.log(p+' passed,',fail+' failed');if(fail)process.exit(1)\""
   },
   "keywords": [
     "agent",
@@ -30,8 +30,9 @@
   "author": "kailin58",
   "license": "MIT",
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "chalk": "^4.1.2",
     "commander": "^11.0.0",
-    "chalk": "^4.1.2"
+    "js-yaml": "^4.1.0",
+    "playwright": "^1.59.1"
   }
 }

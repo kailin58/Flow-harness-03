@@ -3,7 +3,8 @@
  * 负责 Supervisor Step 2: 将任务拆解为可执行的子任务
  */
 class TaskDecomposer {
-  constructor() {
+  constructor(options = {}) {
+    this.knowledgeBase = options.knowledgeBase || null;
     this.decompositionStrategies = this.initializeStrategies();
   }
 
@@ -11,8 +12,41 @@ class TaskDecomposer {
    * 拆解任务
    */
   decompose(analysis, context = {}) {
+    let knowledgeHint = null;
+    try {
+      if (this.knowledgeBase && this.knowledgeBase.patterns) {
+        const patterns = this.knowledgeBase.patterns;
+        if (patterns.successful_patterns) {
+          const matchedPattern = patterns.successful_patterns.find(
+            p => p.pattern === `${analysis.taskType}:full_workflow`
+          );
+          if (matchedPattern) {
+            knowledgeHint = {
+              avgTime: matchedPattern.avg_time,
+              reliability: matchedPattern.recommendation,
+              sampleCount: matchedPattern.success_count
+            };
+          }
+        }
+      }
+    } catch (e) {
+      // 知识库查询失败不阻塞分解流程
+    }
+
     const strategy = this.selectStrategy(analysis);
     const subtasks = strategy.decompose(analysis, context);
+
+    if (knowledgeHint && knowledgeHint.avgTime > 5000) {
+      const checkpointIndex = Math.floor(subtasks.length / 2);
+      subtasks.splice(checkpointIndex, 0, {
+        id: `checkpoint_${Date.now()}`,
+        name: '中间检查点',
+        description: `基于历史数据（平均耗时${Math.round(knowledgeHint.avgTime)}ms，${knowledgeHint.sampleCount}次样本），插入中间验证`,
+        type: 'inspect',
+        estimatedTime: 5,
+        priority: 'medium'
+      });
+    }
 
     // 添加依赖关系
     const subtasksWithDeps = this.addDependencies(subtasks, analysis.taskType);
@@ -25,7 +59,8 @@ class TaskDecomposer {
       strategy: strategy.name,
       subtasks: subtasksWithConstraints,
       totalSubtasks: subtasksWithConstraints.length,
-      estimatedTotalTime: this.estimateTotalTime(subtasksWithConstraints)
+      estimatedTotalTime: this.estimateTotalTime(subtasksWithConstraints),
+      knowledgeHint: knowledgeHint
     };
   }
 
@@ -39,21 +74,41 @@ class TaskDecomposer {
 
   /**
    * 添加任务依赖关系
+   * 采用阶段模型：同阶段任务可并行，后阶段依赖前阶段所有任务完成
    */
   addDependencies(subtasks, taskType) {
-    // 为子任务添加依赖关系（哪些任务必须先完成）
-    return subtasks.map((task, index) => {
+    // 阶段划分：0=探索/分析/研究, 1=规划/设计, 2=执行/实现, 3=测试/检查
+    const PHASE_MAP = {
+      explore: 0, analyze: 0, search: 0, research: 0, web_search: 0, doc_lookup: 0, api_reference: 0,
+      plan: 1, design: 1, review: 1,
+      code: 2, write: 2, implement: 2, execute: 2, refactor: 2,
+      test: 3, inspect: 3, verify: 3
+    };
+
+    const getPhase = (task) => PHASE_MAP[task.type] ?? 2;
+
+    // 按阶段分组
+    const phaseGroups = {};
+    subtasks.forEach(task => {
+      const phase = getPhase(task);
+      if (!phaseGroups[phase]) phaseGroups[phase] = [];
+      phaseGroups[phase].push(task.id);
+    });
+
+    const sortedPhases = Object.keys(phaseGroups).map(Number).sort((a, b) => a - b);
+
+    return subtasks.map(task => {
+      const myPhase = getPhase(task);
+      const myPhaseIdx = sortedPhases.indexOf(myPhase);
       const dependencies = [];
 
-      // 大多数任务是顺序依赖的
-      if (index > 0) {
-        dependencies.push(subtasks[index - 1].id);
+      // 依赖所有前置阶段的任务（而非链式依赖单个前驱）
+      if (myPhaseIdx > 0) {
+        const prevPhase = sortedPhases[myPhaseIdx - 1];
+        dependencies.push(...(phaseGroups[prevPhase] || []));
       }
 
-      return {
-        ...task,
-        dependencies: dependencies
-      };
+      return { ...task, dependencies };
     });
   }
 
@@ -416,6 +471,54 @@ class TaskDecomposer {
               estimatedTime: 15,
               priority: 'critical',
               requiresAuth: true
+            }
+          ];
+        }
+      },
+
+      'research': {
+        name: '研究调研策略',
+        decompose: (analysis, context) => {
+          return [
+            {
+              id: 'research_1',
+              name: '理解研究目标',
+              description: '明确需要查找的信息和研究范围',
+              type: 'analyze',
+              estimatedTime: 5,
+              priority: 'high'
+            },
+            {
+              id: 'research_2',
+              name: '网络搜索',
+              description: '通过搜索引擎查找相关资料',
+              type: 'research',
+              estimatedTime: 10,
+              priority: 'high'
+            },
+            {
+              id: 'research_3',
+              name: '文档查询',
+              description: '查询官方文档和技术参考',
+              type: 'doc_lookup',
+              estimatedTime: 15,
+              priority: 'high'
+            },
+            {
+              id: 'research_4',
+              name: '整理信息',
+              description: '整理收集到的信息并提取关键点',
+              type: 'analyze',
+              estimatedTime: 10,
+              priority: 'medium'
+            },
+            {
+              id: 'research_5',
+              name: '输出调研报告',
+              description: '输出研究结果和建议',
+              type: 'write',
+              estimatedTime: 15,
+              priority: 'medium'
             }
           ];
         }

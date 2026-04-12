@@ -1,0 +1,36 @@
+{
+  "priority": [
+    "edge",
+    "chrome",
+    "brave",
+    "opera",
+    "firefox"
+  ],
+  "autoStart": true,
+  "defaultDebugPort": 9222,
+  "_说明": {
+    "priority": "浏览器优先级，从高到低排列",
+    "autoStart": "是否自动启动浏览器（如果未运行）",
+    "supported_browsers": {
+      "international": [
+        "chrome",
+        "edge",
+        "brave",
+        "opera",
+        "firefox"
+      ],
+      "chinese": [
+        "qq",
+        "_360se",
+        "_360chrome",
+        "sogou",
+        "uc",
+        "liebao",
+        "cent",
+        "twinkle",
+        "maxthon",
+        "_2345"
+      ]
+    }
+  }
+}

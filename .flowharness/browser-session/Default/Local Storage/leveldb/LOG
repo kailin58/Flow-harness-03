@@ -1,0 +1,8 @@
+2026/04/13-00:02:18.252 4e08 Creating DB C:\Users\kaili\Desktop\Flow harness\.flowharness\browser-session\Default\Local Storage\leveldb since it was missing.
+2026/04/13-00:02:18.271 4e08 Reusing MANIFEST C:\Users\kaili\Desktop\Flow harness\.flowharness\browser-session\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/13-00:02:48.766 7264 Level-0 table #5: started
+2026/04/13-00:02:48.770 7264 Level-0 table #5: 138269 bytes OK
+2026/04/13-00:02:48.771 7264 Delete type=0 #3
+2026/04/13-00:03:07.057 7264 Level-0 table #7: started
+2026/04/13-00:03:07.064 7264 Level-0 table #7: 375009 bytes OK
+2026/04/13-00:03:07.066 7264 Delete type=0 #4

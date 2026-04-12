@@ -32,7 +32,7 @@ async function testEvolutionEngine() {
     const engine = new EvolutionEngine({ logger: silentLogger });
     assert(engine !== null, 'EvolutionEngine 实例创建成功');
     assert(engine.config.minSamples === 5, '默认 minSamples = 5');
-    assert(engine.config.confidenceThreshold === 0.7, '默认 confidenceThreshold = 0.7');
+    assert(engine.config.confidenceThreshold === 0.65, '默认 confidenceThreshold = 0.65');
 
     // ---- Test 3: Record 记录事件 ----
     console.log('\nTest 3: Record 记录');

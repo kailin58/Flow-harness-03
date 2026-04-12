@@ -20,7 +20,7 @@ function testTaskDecomposer() {
     console.log('\nTest 1: 基本实例化');
     assert(decomposer !== null, 'TaskDecomposer 创建成功');
     assert(typeof decomposer.decompositionStrategies === 'object', '策略已初始化');
-    assert(Object.keys(decomposer.decompositionStrategies).length === 7, '7 种策略');
+    assert(Object.keys(decomposer.decompositionStrategies).length === 8, '8 种策略（含 research）');
 
     // ---- Test 2: Bug修复策略拆解 ----
     console.log('\nTest 2: Bug修复策略拆解');
@@ -82,10 +82,15 @@ function testTaskDecomposer() {
     // ---- Test 9: 依赖关系 ----
     console.log('\nTest 9: 依赖关系');
     const deps = bugDecomp.subtasks;
+    // 阶段模型: explore/analyze(阶段0) → plan(阶段1) → code(阶段2) → test(阶段3)
+    // bug_1, bug_2, bug_3 都是阶段0，无依赖
     assert(deps[0].dependencies.length === 0, '第 1 个子任务无依赖');
-    assert(deps[1].dependencies.length === 1, '第 2 个子任务依赖 1 个');
-    assert(deps[1].dependencies[0] === 'bug_1', '第 2 个依赖 bug_1');
-    assert(deps[5].dependencies.length === 1, '最后一个有 1 个依赖');
+    assert(deps[1].dependencies.length === 0, '第 2 个子任务无依赖（同阶段）');
+    assert(deps[2].dependencies.length === 0, '第 3 个子任务无依赖（同阶段）');
+    // bug_4 是 plan 类型（阶段1），依赖阶段0的所有任务
+    assert(deps[3].dependencies.length === 3, '第 4 个子任务依赖阶段0的3个任务');
+    // bug_6 是 test 类型（阶段3），依赖阶段2的任务
+    assert(deps[5].dependencies.length === 1, '最后一个依赖阶段2的1个任务');
     assert(deps[5].dependencies[0] === 'bug_5', '最后一个依赖 bug_5');
 
     // ---- Test 10: 约束条件 (基础) ----

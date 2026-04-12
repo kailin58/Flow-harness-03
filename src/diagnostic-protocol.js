@@ -50,6 +50,10 @@ class DiagnosticProtocol {
     this.knowledgeBase = options.knowledgeBase || null;
     this.memoryStore = options.memoryStore || null;
 
+    // 滑动窗口配置
+    this._windowSize = options.circuitBreaker?.windowSize || 50;
+    this._recentResults = [];  // 滑动窗口：存储最近 N 次结果 (true=成功, false=失败)
+
     // 熔断器状态
     this.circuitBreaker = {
       level: 0,        // 0=正常, 1=降速, 2=降级, 3=停机
@@ -57,9 +61,9 @@ class DiagnosticProtocol {
       consecutiveFailures: 0,
       lastFailureTime: null,
       thresholds: {
-        l1: options.circuitBreaker?.l1Threshold || 3,   // 连续3次失败 → L1
-        l2: options.circuitBreaker?.l2Threshold || 5,   // 连续5次失败 → L2
-        l3: options.circuitBreaker?.l3Threshold || 8,   // 连续8次失败 → L3
+        l1: options.circuitBreaker?.l1Threshold || 0.4,   // 40% 失败率 → L1
+        l2: options.circuitBreaker?.l2Threshold || 0.6,   // 60% 失败率 → L2
+        l3: options.circuitBreaker?.l3Threshold || 0.8,   // 80% 失败率 → L3
         resetTimeout: options.circuitBreaker?.resetTimeout || 60000 // 60秒无失败后重置
       }
     };
@@ -407,7 +411,31 @@ class DiagnosticProtocol {
     if (cb.lastFailureTime && (now - cb.lastFailureTime) > cb.thresholds.resetTimeout) {
       cb.consecutiveFailures = 0;
       cb.level = 0;
+      this._recentResults = [];  // 重置滑动窗口
       this.logger.info('Circuit breaker reset (timeout elapsed)');
+    }
+
+    // SEV 4/5 视为轻微问题，记录为成功；SEV 1-3 记录为失败
+    const isMajorFailure = sev.level <= 3;
+    this._recentResults.push(!isMajorFailure);
+    if (this._recentResults.length > this._windowSize) {
+      this._recentResults.shift();
+    }
+
+    if (!isMajorFailure) {
+      cb.consecutiveFailures = 0;
+      const minorFailRate = this._getFailRate();
+      return {
+        level: cb.level,
+        consecutiveFailures: cb.consecutiveFailures,
+        totalFailures: cb.failureCount,
+        failRate: minorFailRate,
+        windowSize: this._recentResults.length,
+        action: cb.level > 0
+          ? Object.values(CIRCUIT_BREAKER_LEVELS).find(l => l.level === cb.level)
+          : null,
+        isOpen: cb.level >= 3
+      };
     }
 
     // 记录失败
@@ -415,17 +443,20 @@ class DiagnosticProtocol {
     cb.consecutiveFailures++;
     cb.lastFailureTime = now;
 
-    // 根据 SEV 加速熔断
-    const sevMultiplier = sev.level <= 2 ? 2 : 1; // SEV1/SEV2 双倍计数
-    const effectiveFailures = cb.consecutiveFailures * sevMultiplier;
+    // 计算滑动窗口失败率
+    const failRate = this._getFailRate();
+
+    // 根据 SEV 加速熔断（SEV1/SEV2 使失败率权重加倍）
+    const sevMultiplier = sev.level <= 2 ? 1.5 : 1;
+    const effectiveFailRate = Math.min(1, failRate * sevMultiplier);
 
     // 判断熔断级别
     let newLevel = 0;
-    if (effectiveFailures >= cb.thresholds.l3) {
+    if (effectiveFailRate >= cb.thresholds.l3) {
       newLevel = 3;
-    } else if (effectiveFailures >= cb.thresholds.l2) {
+    } else if (effectiveFailRate >= cb.thresholds.l2) {
       newLevel = 2;
-    } else if (effectiveFailures >= cb.thresholds.l1) {
+    } else if (effectiveFailRate >= cb.thresholds.l1) {
       newLevel = 1;
     }
 
@@ -436,7 +467,7 @@ class DiagnosticProtocol {
       this.logger.warn({
         level: newLevel,
         name: levelInfo?.name,
-        consecutiveFailures: cb.consecutiveFailures,
+        failRate: failRate.toFixed(2),
         action: levelInfo?.action
       }, `Circuit breaker triggered: L${newLevel}`);
 
@@ -445,7 +476,7 @@ class DiagnosticProtocol {
         timestamp: new Date().toISOString(),
         type: `circuit_breaker_l${newLevel}`,
         sev: sev,
-        consecutiveFailures: cb.consecutiveFailures,
+        failRate: failRate,
         action: levelInfo?.action
       });
     }
@@ -454,6 +485,8 @@ class DiagnosticProtocol {
       level: cb.level,
       consecutiveFailures: cb.consecutiveFailures,
       totalFailures: cb.failureCount,
+      failRate: failRate,
+      windowSize: this._recentResults.length,
       action: cb.level > 0
         ? Object.values(CIRCUIT_BREAKER_LEVELS).find(l => l.level === cb.level)
         : null,
@@ -462,15 +495,40 @@ class DiagnosticProtocol {
   }
 
   /**
+   * 计算滑动窗口失败率
+   */
+  _getFailRate() {
+    if (this._recentResults.length === 0) return 0;
+    const failures = this._recentResults.filter(r => !r).length;
+    return failures / this._recentResults.length;
+  }
+
+  /**
    * 记录成功（降低熔断计数）
    */
   recordSuccess() {
+    // 记录成功到滑动窗口
+    this._recentResults.push(true);
+    if (this._recentResults.length > this._windowSize) {
+      this._recentResults.shift();
+    }
+
     this.circuitBreaker.consecutiveFailures = 0;
 
-    // 成功时逐级恢复
-    if (this.circuitBreaker.level > 0) {
-      this.circuitBreaker.level = Math.max(0, this.circuitBreaker.level - 1);
-      this.logger.info({ level: this.circuitBreaker.level }, 'Circuit breaker level decreased after success');
+    // 根据当前失败率决定是否降低级别
+    const failRate = this._getFailRate();
+    const cb = this.circuitBreaker;
+
+    if (cb.level > 0) {
+      // 只有当失败率低于当前级别阈值时才降低
+      if (cb.level === 3 && failRate < cb.thresholds.l3) {
+        cb.level = 2;
+      } else if (cb.level === 2 && failRate < cb.thresholds.l2) {
+        cb.level = 1;
+      } else if (cb.level === 1 && failRate < cb.thresholds.l1) {
+        cb.level = 0;
+      }
+      this.logger.info({ level: cb.level, failRate: failRate.toFixed(2) }, 'Circuit breaker level adjusted after success');
     }
   }
 
@@ -481,6 +539,7 @@ class DiagnosticProtocol {
     this.circuitBreaker.level = 0;
     this.circuitBreaker.consecutiveFailures = 0;
     this.circuitBreaker.lastFailureTime = null;
+    this._recentResults = [];  // 重置滑动窗口
     this.logger.info('Circuit breaker manually reset');
   }
 
@@ -489,6 +548,7 @@ class DiagnosticProtocol {
    */
   getCircuitBreakerStatus() {
     const cb = this.circuitBreaker;
+    const failRate = this._getFailRate();
     return {
       level: cb.level,
       levelName: cb.level > 0
@@ -496,6 +556,9 @@ class DiagnosticProtocol {
         : 'normal',
       consecutiveFailures: cb.consecutiveFailures,
       totalFailures: cb.failureCount,
+      failRate: failRate,
+      windowSize: this._recentResults.length,
+      thresholds: cb.thresholds,
       isOpen: cb.level >= 3
     };
   }

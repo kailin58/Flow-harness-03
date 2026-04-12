@@ -1,0 +1,87 @@
+{
+  "version": "1.0",
+  "description": "Flow Harness 预定义命令注册表 - 斜杠命令是 Supervisor 工作流的快捷入口",
+  "commands": {
+    "/plan": {
+      "type": "workflow",
+      "task_type": "planning",
+      "flags": ["--dry-run"],
+      "description": "规划任务（只分析不执行）",
+      "example": "/plan 用户认证功能"
+    },
+    "/build": {
+      "type": "workflow",
+      "task_type": "feature",
+      "description": "功能开发工作流",
+      "example": "/build 实现用户注册"
+    },
+    "/fix": {
+      "type": "workflow",
+      "task_type": "bug_fix",
+      "description": "Bug 修复工作流",
+      "example": "/fix 登录页面空白"
+    },
+    "/refactor": {
+      "type": "workflow",
+      "task_type": "refactor",
+      "description": "代码重构工作流",
+      "example": "/refactor 提取公共工具函数"
+    },
+    "/docs": {
+      "type": "workflow",
+      "task_type": "documentation",
+      "description": "文档生成工作流",
+      "example": "/docs API 接口文档"
+    },
+    "/test": {
+      "type": "workflow",
+      "task_type": "testing",
+      "description": "测试编写工作流",
+      "example": "/test 为 hook-engine 写单元测试"
+    },
+    "/review": {
+      "type": "inspector",
+      "skills": ["code-review", "security-review"],
+      "description": "代码审查",
+      "example": "/review src/agent-executor.js"
+    },
+    "/security": {
+      "type": "inspector",
+      "skills": ["security-review"],
+      "description": "专项安全扫描",
+      "example": "/security src/"
+    },
+    "/quality": {
+      "type": "inspector",
+      "skills": ["code-review", "antipattern-detect"],
+      "description": "全面质量检查",
+      "example": "/quality"
+    },
+    "/antipattern": {
+      "type": "inspector",
+      "skills": ["antipattern-detect"],
+      "description": "反模式检测",
+      "example": "/antipattern src/supervisor-agent.js"
+    },
+    "/status": {
+      "type": "management",
+      "action": "show_status",
+      "description": "查看系统状态"
+    },
+    "/budget": {
+      "type": "management",
+      "action": "show_budget",
+      "description": "Token 预算查看"
+    },
+    "/skills": {
+      "type": "management",
+      "action": "list_skills",
+      "description": "列出已激活技能"
+    },
+    "/history": {
+      "type": "management",
+      "action": "show_history",
+      "description": "最近执行历史"
+    }
+  }
+}

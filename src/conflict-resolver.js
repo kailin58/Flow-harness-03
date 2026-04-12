@@ -581,6 +581,24 @@ class ConflictResolver {
   getConflictLog(limit = 20) {
     return this.conflictLog.slice(-limit);
   }
+
+  /**
+   * 注册工具/执行端的优先级（向 Supervisor 暴露的兼容接口）
+   * @param {string} toolName - 工具名称（如 'supervisor', 'cursor'）
+   * @param {number} priority - 优先级数值（越大越高）
+   */
+  registerToolPriority(toolName, priority) {
+    this.priorities[toolName] = priority;
+  }
+
+  /**
+   * 获取指定能力的所有提供者列表（向 Supervisor 暴露的兼容接口）
+   * @param {string} capability - 能力名称
+   * @returns {Array} 提供者列表
+   */
+  getProvidersForCapability(capability) {
+    return this.capabilityRegistry.get(capability) || [];
+  }
 }
 
 // ============================================================

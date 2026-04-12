@@ -483,6 +483,134 @@ class MetricsCollector {
   unregister(name) {
     return this.metrics.delete(name);
   }
+
+  // ----------------------------------------------------------
+  // HTTP Endpoint
+  // ----------------------------------------------------------
+
+  /**
+   * 启动 HTTP metrics 服务端点
+   * @param {Object} options
+   * @param {number} options.port - 监听端口 (默认 9090)
+   * @param {string} options.host - 绑定地址 (默认 127.0.0.1)
+   * @param {string} options.path - metrics 路径 (默认 /metrics)
+   * @returns {Promise<http.Server>}
+   */
+  async startHTTPEndpoint(options = {}) {
+    const http = require('http');
+    const port = options.port || 9090;
+    const host = options.host || '127.0.0.1';
+    const metricsPath = options.path || '/metrics';
+
+    if (this._httpServer) {
+      this.logger.warn('HTTP endpoint already running');
+      return this._httpServer;
+    }
+
+    const server = http.createServer(async (req, res) => {
+      const url = new URL(req.url, `http://${req.headers.host}`);
+
+      // Metrics endpoint
+      if (url.pathname === metricsPath && req.method === 'GET') {
+        try {
+          // 更新系统指标
+          this.updateSystemMetrics();
+
+          const output = this.toPrometheus();
+          res.writeHead(200, {
+            'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+            'Cache-Control': 'no-cache'
+          });
+          res.end(output);
+        } catch (error) {
+          this.logger.error({ error: error.message }, 'Failed to generate metrics');
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Internal Server Error');
+        }
+        return;
+      }
+
+      // Health check endpoint
+      if (url.pathname === '/health' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+        return;
+      }
+
+      // Stats endpoint (JSON format)
+      if (url.pathname === '/stats' && req.method === 'GET') {
+        try {
+          const stats = this.getStats();
+          const metricsList = this.listMetrics();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ stats, metrics: metricsList }, null, 2));
+        } catch (error) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Internal Server Error');
+        }
+        return;
+      }
+
+      // 404 for other paths
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+    });
+
+    return new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(port, host, () => {
+        server.removeListener('error', reject);
+        this._httpServer = server;
+        this.logger.info({ port, host, metricsPath }, 'Metrics HTTP endpoint started');
+        resolve(server);
+      });
+    });
+  }
+
+  /**
+   * 停止 HTTP metrics 服务
+   * @returns {Promise<void>}
+   */
+  async stopHTTPEndpoint() {
+    if (!this._httpServer) {
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      this._httpServer.close((error) => {
+        if (error) {
+          reject(error);
+        } else {
+          this._httpServer = null;
+          this.logger.info('Metrics HTTP endpoint stopped');
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * 检查 HTTP endpoint 是否运行
+   * @returns {boolean}
+   */
+  isHTTPEndpointRunning() {
+    return this._httpServer !== null && this._httpServer.listening;
+  }
+
+  /**
+   * 获取 HTTP endpoint 地址
+   * @returns {Object|null} { address, port }
+   */
+  getHTTPEndpointAddress() {
+    if (!this._httpServer || !this._httpServer.listening) {
+      return null;
+    }
+    const addr = this._httpServer.address();
+    return {
+      address: addr.address,
+      port: addr.port
+    };
+  }
 }
 
 // ============================================================

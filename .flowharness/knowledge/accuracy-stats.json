@@ -1,0 +1,110 @@
+{
+  "baidu.com:navigate": {
+    "domain": "baidu.com",
+    "operation": "navigate",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "success": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "baidu.com:input": {
+    "domain": "baidu.com",
+    "operation": "input",
+    "totalAttempts": 1,
+    "successCount": 0,
+    "methodStats": {
+      "all_failed": {
+        "attempts": 1,
+        "successes": 0
+      }
+    }
+  },
+  "baidu.com:click": {
+    "domain": "baidu.com",
+    "operation": "click",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "selector": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "taobao.com:navigate": {
+    "domain": "taobao.com",
+    "operation": "navigate",
+    "totalAttempts": 2,
+    "successCount": 2,
+    "methodStats": {
+      "success": {
+        "attempts": 2,
+        "successes": 2
+      }
+    }
+  },
+  "taobao.com:input": {
+    "domain": "taobao.com",
+    "operation": "input",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "selector": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "taobao.com:click": {
+    "domain": "taobao.com",
+    "operation": "click",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "visual": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "jd.com:navigate": {
+    "domain": "jd.com",
+    "operation": "navigate",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "success": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "jd.com:input": {
+    "domain": "jd.com",
+    "operation": "input",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "selector": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  },
+  "jd.com:click": {
+    "domain": "jd.com",
+    "operation": "click",
+    "totalAttempts": 1,
+    "successCount": 1,
+    "methodStats": {
+      "visual": {
+        "attempts": 1,
+        "successes": 1
+      }
+    }
+  }
+}

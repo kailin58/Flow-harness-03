@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-04-12T07:02:29.815Z",
+  "last_updated": "2026-04-12T13:34:00.041Z",
   "successful_patterns": [
     {
       "pattern": "feature:full_workflow",
@@ -50,10 +50,10 @@
       "pattern": "general:full_workflow",
       "workflow": "general",
       "step": "full_workflow",
-      "success_count": 33,
-      "total_count": 33,
+      "success_count": 73,
+      "total_count": 73,
       "success_rate": 1,
-      "avg_time": 9751.60606060606,
+      "avg_time": 17337.821917808214,
       "learned_at": "2026-04-12T00:42:00.197Z",
       "recommendation": "highly_reliable"
     },
@@ -61,8 +61,8 @@
       "pattern": "general:rework_pattern",
       "workflow": "general",
       "step": "rework_pattern",
-      "success_count": 31,
-      "total_count": 31,
+      "success_count": 71,
+      "total_count": 71,
       "success_rate": 1,
       "avg_time": null,
       "learned_at": "2026-04-12T00:43:25.564Z",
@@ -74,22 +74,22 @@
       "pattern": "feature:full_workflow",
       "workflow": "feature",
       "step": "full_workflow",
-      "failure_count": 79,
-      "total_count": 79,
+      "failure_count": 39,
+      "total_count": 39,
       "failure_rate": 1,
       "errors": [
         "部分任务失败"
       ],
       "learned_at": "2026-04-11T14:27:56.953Z",
-      "recommendation": "needs_attention",
+      "recommendation": "noise_adjusted",
       "suggestion": "Consider reviewing or disabling this step"
     },
     {
       "pattern": "general:full_workflow",
       "workflow": "general",
       "step": "full_workflow",
-      "failure_count": 110,
-      "total_count": 110,
+      "failure_count": 56,
+      "total_count": 56,
       "failure_rate": 1,
       "errors": [
         "部分任务失败"
@@ -128,36 +128,46 @@
       "pattern": "testing:full_workflow",
       "workflow": "testing",
       "step": "full_workflow",
-      "failure_count": 47,
-      "total_count": 47,
+      "failure_count": 23,
+      "total_count": 23,
       "failure_rate": 1,
       "errors": [
         "部分任务失败"
       ],
       "learned_at": "2026-04-11T14:36:38.461Z",
-      "recommendation": "needs_attention",
+      "recommendation": "noise_adjusted",
       "suggestion": "Consider reviewing or disabling this step"
     },
     {
       "pattern": "bug_fix:full_workflow",
       "workflow": "bug_fix",
       "step": "full_workflow",
-      "failure_count": 19,
-      "total_count": 19,
+      "failure_count": 9,
+      "total_count": 9,
       "failure_rate": 1,
       "errors": [
         "部分任务失败"
       ],
       "learned_at": "2026-04-11T15:24:45.235Z",
-      "recommendation": "needs_attention",
+      "recommendation": "noise_adjusted",
       "suggestion": "Consider reviewing or disabling this step"
+    },
+    {
+      "pattern": "general:rework_pattern",
+      "workflow": "general",
+      "step": "rework_pattern",
+      "failure_count": 1,
+      "total_count": 1,
+      "failure_rate": 1,
+      "errors": [],
+      "learned_at": "2026-04-12T12:59:15.429Z"
     }
   ],
   "optimizations": [],
   "statistics": {
-    "total_runs": 608,
-    "successful_runs": 243,
-    "failed_runs": 365,
+    "total_runs": 690,
+    "successful_runs": 323,
+    "failed_runs": 367,
     "avg_execution_time": null
   }
 }

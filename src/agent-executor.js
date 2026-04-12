@@ -19,6 +19,11 @@ const TaskSerializer = require('./task-serializer');
 const IPCChannel = require('./ipc-channel');
 const CrossPlatformDispatcher = require('./cross-platform-dispatcher');
 const LeadershipManager = require('./leadership-manager');
+const { FileOperator } = require('./file-operator');
+const { TokenTracker } = require('./token-tracker');
+const { CheckpointManager } = require('./checkpoint-manager');
+const { BrowserAssistant, BROWSER_STATE } = require('./browser-assistant');
+const { createLogger } = require('./logger');
 
 const execAsync = promisify(exec);
 
@@ -30,6 +35,7 @@ class AgentExecutor {
   constructor(agentRegistry, workingDir = process.cwd(), config = {}) {
     this.agentRegistry = agentRegistry;
     this.workingDir = workingDir;
+    this.logger = createLogger({ name: 'agent-executor' });
     this.taskAnalyzer = new TaskAnalyzer();
     this.taskDecomposer = new TaskDecomposer();
     this.inspector = new Inspector();
@@ -159,6 +165,49 @@ class AgentExecutor {
         config.leadershipManager
       );
     }
+
+    // 执行模式: simulate（测试）或 real（生产）
+    this.mode = config.mode || (process.env.NODE_ENV === 'test' ? 'simulate' : 'real');
+
+    // 初始化 TokenTracker（P1 生产模块）
+    this.tokenTracker = new TokenTracker({
+      budgets: config.tokenBudgets || {},
+      enforceHard: config.enforceTokenBudget || false,
+      onAlert: (alert) => {
+        this.logger.warn(`Token budget alert: ${alert.level} - ${alert.message}`);
+      },
+      ...config.tokenTracker
+    });
+
+    // 初始化 CheckpointManager（P1 生产模块）
+    this.checkpointManager = new CheckpointManager({
+      storageDir: config.checkpointDir || '.flowharness/checkpoints',
+      maxCheckpoints: config.maxCheckpoints || 20,
+      ...config.checkpointManager
+    });
+
+    // 初始化 FileOperator（真实模式下使用）
+    this.fileOperator = new FileOperator({
+      rootDir: this.workingDir,
+      policyChecker: config.policyChecker || null
+    });
+
+    // 初始化 BrowserAssistant（人工辅助模式，合规）
+    this.browserAssistant = new BrowserAssistant({
+      userDataDir: config.browserDataDir || path.join(this.workingDir, '.flowharness', 'browser-session'),
+      timeout: config.browserTimeout || 300000
+    });
+  }
+
+  isSimulateMode() {
+    return this.mode === 'simulate';
+  }
+
+  setMode(mode) {
+    if (mode !== 'simulate' && mode !== 'real') {
+      throw new Error(`Invalid mode: ${mode}. Must be 'simulate' or 'real'`);
+    }
+    this.mode = mode;
   }
 
   /**
@@ -276,6 +325,13 @@ class AgentExecutor {
       throw new Error(`Agent 不存在: ${agentId}`);
     }
 
+    // ===== P1: Token 预算检查 =====
+    const budgetCheck = this.tokenTracker.checkBudget('task');
+    if (!budgetCheck.allowed) {
+      this.logger.warn(`Token 预算超限: ${budgetCheck.reason}`);
+      throw new Error(`Token 预算超限: ${budgetCheck.reason}`);
+    }
+
     // 开始执行监控
     const execution = this.executionMonitor.startExecution({
       agentId: agentId,
@@ -325,6 +381,10 @@ class AgentExecutor {
 
         case 'inspector':
           result = await this.executeInspectorAgent(task, context);
+          break;
+
+        case 'research':
+          result = await this.executeResearchAgent(task, context);
           break;
 
         case 'supervisor':
@@ -381,6 +441,25 @@ class AgentExecutor {
         timedOut: stats.timedOut
       };
 
+      // ===== P1: Token 使用记录 =====
+      if (result.tokenUsage) {
+        this.tokenTracker.recordUsage(
+          result.tokenUsage.input || 0,
+          result.tokenUsage.output || 1,
+          result.tokenUsage.model || 'claude-sonnet',
+          context.sessionId || 'default-session'
+        );
+      } else {
+        // 无精确 token 数据时，基于执行时长估算
+        const estimatedTokens = Math.round(stats.duration / 100);
+        this.tokenTracker.recordUsage(
+          estimatedTokens,
+          Math.round(estimatedTokens * 0.3),
+          'task',
+          context.sessionId || 'default-session'
+        );
+      }
+
       // 如果执行结果为失败，记录到错误模式识别器
       if (!result.success && result.error) {
         const errorAnalysis = this.errorPatternRecognizer.recordError({
@@ -433,6 +512,28 @@ class AgentExecutor {
 
       // 将错误分析添加到错误对象
       error.analysis = errorAnalysis;
+
+      // ===== P1: 检查点保存（失败时保存以支持恢复） =====
+      try {
+        const checkpoint = await this.checkpointManager.createCheckpoint({
+          taskId: task.id || 'unknown',
+          agentId: agentId,
+          status: 'failed',
+          error: {
+            message: error.message,
+            analysis: errorAnalysis
+          },
+          context: {
+            task: task,
+            partialResult: result || null
+          },
+          sessionId: context.sessionId || 'default-session'
+        });
+        error.checkpointId = checkpoint.id;
+        this.logger.info(`检查点已保存: ${checkpoint.id}`);
+      } catch (cpError) {
+        this.logger.warn(`保存检查点失败: ${cpError.message}`);
+      }
 
       throw error;
 
@@ -922,6 +1023,605 @@ class AgentExecutor {
     throw new Error('Supervisor Agent 不能被执行');
   }
 
+  // ========== Research Agent 实现 ==========
+
+  /**
+   * 执行 Research Agent
+   */
+  async executeResearchAgent(task, context) {
+    this.validateTask(task);
+
+    switch (task.action) {
+      case 'web_search':
+        return await this.researchWebSearch(task, context);
+
+      case 'fetch_url':
+        return await this.researchFetchUrl(task, context);
+
+      case 'doc_lookup':
+        return await this.researchDocLookup(task, context);
+
+      case 'api_reference':
+        return await this.researchApiReference(task, context);
+
+      // 浏览器辅助操作（人工辅助模式）
+      case 'browser_visit':
+        return await this.researchBrowserVisit(task, context);
+
+      case 'browser_confirm':
+        return await this.researchBrowserConfirm(task, context);
+
+      case 'browser_action':
+        return await this.researchBrowserAction(task, context);
+
+      case 'browser_status':
+        return await this.researchBrowserStatus(task, context);
+
+      default:
+        throw new Error(`Research Agent 不支持的操作: ${task.action}`);
+    }
+  }
+
+  /**
+   * Research Agent - 网络搜索
+   * 使用 WebSearch API 执行搜索
+   */
+  async researchWebSearch(task, context) {
+    const query = task.query;
+    if (!query) {
+      throw new Error('网络搜索需要指定 query');
+    }
+
+    try {
+      // 使用内置 WebSearch 功能
+      const { default: fetch } = await import('node-fetch');
+      const searchEngine = task.engine || 'duckduckgo';
+
+      let results = [];
+
+      // DuckDuckGo Instant Answer API (免费，无需 API Key)
+      if (searchEngine === 'duckduckgo') {
+        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`;
+        const response = await fetch(url, { timeout: 10000 });
+        const data = await response.json();
+
+        // 解析结果
+        if (data.AbstractText) {
+          results.push({
+            title: data.Heading || query,
+            snippet: data.AbstractText,
+            url: data.AbstractURL || '',
+            source: 'DuckDuckGo Instant Answer'
+          });
+        }
+
+        if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+          for (const topic of data.RelatedTopics.slice(0, 5)) {
+            if (topic.Text && topic.FirstURL) {
+              results.push({
+                title: topic.Text.split(' - ')[0] || topic.Text.substring(0, 100),
+                snippet: topic.Text,
+                url: topic.FirstURL,
+                source: 'DuckDuckGo Related'
+              });
+            }
+          }
+        }
+      }
+
+      // 如果有自定义搜索 API (如 Google Custom Search, Bing)
+      if (task.apiKey && task.searchEngineId) {
+        const customUrl = `https://www.googleapis.com/customsearch/v1?key=${task.apiKey}&cx=${task.searchEngineId}&q=${encodeURIComponent(query)}`;
+        const response = await fetch(customUrl, { timeout: 10000 });
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+          results = data.items.slice(0, 10).map(item => ({
+            title: item.title,
+            snippet: item.snippet,
+            url: item.link,
+            source: 'Google Custom Search'
+          }));
+        }
+      }
+
+      // 备用：如果无结果，返回提示
+      if (results.length === 0) {
+        results.push({
+          title: '搜索建议',
+          snippet: `未找到 "${query}" 的即时结果。建议访问官方文档或技术社区获取更多信息。`,
+          url: '',
+          source: 'System'
+        });
+      }
+
+      return this.formatResult('research', task, {
+        action: 'web_search',
+        query: query,
+        engine: searchEngine,
+        results: results,
+        count: results.length,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
+  /**
+   * Research Agent - 抓取 URL 内容
+   */
+  async researchFetchUrl(task, context) {
+    const url = task.url;
+    if (!url) {
+      throw new Error('URL 抓取需要指定 url');
+    }
+
+    try {
+      const { default: fetch } = await import('node-fetch');
+
+      const response = await fetch(url, {
+        timeout: task.timeout || 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; FlowHarness/1.0; +https://github.com/flowharness)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let content;
+      let contentLength = 0;
+
+      if (contentType.includes('application/json')) {
+        content = await response.json();
+        contentLength = JSON.stringify(content).length;
+      } else {
+        content = await response.text();
+        contentLength = content.length;
+
+        // 简单的 HTML 清理（提取正文）
+        if (contentType.includes('text/html') && task.extractText) {
+          content = this.extractTextFromHtml(content);
+        }
+      }
+
+      // 截断过长的内容
+      const maxLength = task.maxLength || 50000;
+      if (typeof content === 'string' && content.length > maxLength) {
+        content = content.substring(0, maxLength) + '\n... (内容已截断)';
+      }
+
+      return this.formatResult('research', task, {
+        action: 'fetch_url',
+        url: url,
+        status: response.status,
+        contentType: contentType,
+        content: content,
+        contentLength: contentLength,
+        truncated: contentLength > maxLength,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
+  /**
+   * Research Agent - 文档查询
+   * 针对常见技术栈的官方文档进行查询
+   */
+  async researchDocLookup(task, context) {
+    const { technology, topic, version } = task;
+    if (!technology || !topic) {
+      throw new Error('文档查询需要指定 technology 和 topic');
+    }
+
+    // 预定义的文档源映射
+    const docSources = {
+      'react': {
+        baseUrl: 'https://react.dev',
+        searchUrl: (topic) => `https://react.dev/search?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://react.dev/reference/react/${topic}`
+      },
+      'vue': {
+        baseUrl: 'https://vuejs.org',
+        searchUrl: (topic) => `https://vuejs.org/search/?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://vuejs.org/api/${topic}.html`
+      },
+      'node': {
+        baseUrl: 'https://nodejs.org',
+        searchUrl: (topic) => `https://nodejs.org/api/`,
+        refUrl: (topic) => `https://nodejs.org/api/${topic}.html`
+      },
+      'typescript': {
+        baseUrl: 'https://www.typescriptlang.org',
+        searchUrl: (topic) => `https://www.typescriptlang.org/search?search=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://www.typescriptlang.org/docs/handbook/${topic}.html`
+      },
+      'javascript': {
+        baseUrl: 'https://developer.mozilla.org',
+        searchUrl: (topic) => `https://developer.mozilla.org/en-US/search?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/${topic}`
+      },
+      'python': {
+        baseUrl: 'https://docs.python.org',
+        searchUrl: (topic) => `https://docs.python.org/3/search.html?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://docs.python.org/3/library/${topic}.html`
+      },
+      'rust': {
+        baseUrl: 'https://doc.rust-lang.org',
+        searchUrl: (topic) => `https://doc.rust-lang.org/std/?search=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://doc.rust-lang.org/std/${topic}`
+      },
+      'go': {
+        baseUrl: 'https://pkg.go.dev',
+        searchUrl: (topic) => `https://pkg.go.dev/search?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://pkg.go.dev/${topic}`
+      },
+      'docker': {
+        baseUrl: 'https://docs.docker.com',
+        searchUrl: (topic) => `https://docs.docker.com/search/?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://docs.docker.com/engine/reference/${topic}/`
+      },
+      'kubernetes': {
+        baseUrl: 'https://kubernetes.io',
+        searchUrl: (topic) => `https://kubernetes.io/docs/search/?q=${encodeURIComponent(topic)}`,
+        refUrl: (topic) => `https://kubernetes.io/docs/concepts/${topic}/`
+      }
+    };
+
+    const source = docSources[technology.toLowerCase()];
+
+    if (!source) {
+      // 未知技术，返回通用搜索建议
+      return this.formatResult('research', task, {
+        action: 'doc_lookup',
+        technology: technology,
+        topic: topic,
+        success: false,
+        message: `暂不支持 ${technology} 的文档查询`,
+        suggestion: `请使用 web_search 搜索 "${technology} ${topic} documentation"`,
+        availableTechnologies: Object.keys(docSources)
+      });
+    }
+
+    try {
+      // 尝试抓取参考文档页面
+      const refUrl = source.refUrl(topic.toLowerCase());
+      const { default: fetch } = await import('node-fetch');
+
+      const response = await fetch(refUrl, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; FlowHarness/1.0)'
+        }
+      });
+
+      if (response.ok) {
+        const content = await response.text();
+        const extractedContent = this.extractTextFromHtml(content);
+
+        return this.formatResult('research', task, {
+          action: 'doc_lookup',
+          technology: technology,
+          topic: topic,
+          version: version || 'latest',
+          success: true,
+          url: refUrl,
+          content: extractedContent.substring(0, 10000),
+          source: source.baseUrl,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // 如果参考页面不存在，返回搜索链接
+      return this.formatResult('research', task, {
+        action: 'doc_lookup',
+        technology: technology,
+        topic: topic,
+        success: false,
+        message: '未找到直接匹配的文档页面',
+        searchUrl: source.searchUrl(topic),
+        suggestion: `请访问 ${source.searchUrl(topic)} 搜索相关文档`
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, {
+        action: 'doc_lookup',
+        technology: technology,
+        topic: topic,
+        success: false,
+        error: error.message,
+        searchUrl: source.searchUrl(topic)
+      }, error);
+    }
+  }
+
+  /**
+   * Research Agent - API 参考查询
+   * 查询 API 端点、参数、响应格式
+   */
+  async researchApiReference(task, context) {
+    const { api, endpoint, method } = task;
+    if (!api) {
+      throw new Error('API 参考查询需要指定 api');
+    }
+
+    // 预定义的 API 文档源
+    const apiSources = {
+      'openai': {
+        baseUrl: 'https://platform.openai.com/docs/api-reference',
+        endpoints: {
+          'chat': '/chat/completions',
+          'completions': '/completions',
+          'embeddings': '/embeddings',
+          'images': '/images',
+          'models': '/models'
+        }
+      },
+      'anthropic': {
+        baseUrl: 'https://docs.anthropic.com/en/api',
+        endpoints: {
+          'messages': '/messages',
+          'streaming': '/streaming'
+        }
+      },
+      'github': {
+        baseUrl: 'https://docs.github.com/en/rest',
+        endpoints: {
+          'repos': '/repos',
+          'issues': '/issues',
+          'pulls': '/pulls',
+          'actions': '/actions'
+        }
+      },
+      'stripe': {
+        baseUrl: 'https://stripe.com/docs/api',
+        endpoints: {
+          'customers': '/customers',
+          'charges': '/charges',
+          'subscriptions': '/subscriptions',
+          'payment_intents': '/payment_intents'
+        }
+      }
+    };
+
+    const source = apiSources[api.toLowerCase()];
+
+    if (!source) {
+      return this.formatResult('research', task, {
+        action: 'api_reference',
+        api: api,
+        endpoint: endpoint,
+        success: false,
+        message: `暂不支持 ${api} 的 API 参考`,
+        suggestion: `请使用 web_search 搜索 "${api} API documentation"`,
+        availableApis: Object.keys(apiSources)
+      });
+    }
+
+    // 构建 API 文档 URL
+    let docUrl = source.baseUrl;
+    if (endpoint && source.endpoints[endpoint]) {
+      docUrl = source.baseUrl + source.endpoints[endpoint];
+    }
+
+    try {
+      const { default: fetch } = await import('node-fetch');
+      const response = await fetch(docUrl, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; FlowHarness/1.0)'
+        }
+      });
+
+      if (response.ok) {
+        const content = await response.text();
+
+        return this.formatResult('research', task, {
+          action: 'api_reference',
+          api: api,
+          endpoint: endpoint || 'overview',
+          method: method || 'any',
+          success: true,
+          url: docUrl,
+          content: this.extractTextFromHtml(content).substring(0, 15000),
+          source: source.baseUrl,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      return this.formatResult('research', task, {
+        action: 'api_reference',
+        api: api,
+        endpoint: endpoint,
+        success: false,
+        message: '无法获取 API 文档',
+        url: docUrl
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, {
+        action: 'api_reference',
+        api: api,
+        endpoint: endpoint,
+        success: false,
+        url: docUrl,
+        error: error.message
+      }, error);
+    }
+  }
+
+  /**
+   * 从 HTML 中提取纯文本
+   * @param {string} html - HTML 内容
+   * @returns {string} 纯文本
+   */
+  extractTextFromHtml(html) {
+    // 移除 script 和 style 标签
+    let text = html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+      .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, '')
+      .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, '')
+      .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, '');
+
+    // 将块级元素替换为换行
+    text = text
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<\/tr>/gi, '\n')
+      .replace(/<\/td>/gi, ' ')
+      .replace(/<\/th>/gi, ' ');
+
+    // 移除所有 HTML 标签
+    text = text.replace(/<[^>]+>/g, '');
+
+    // 解码 HTML 实体
+    text = text
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
+    // 清理多余空白
+    text = text
+      .replace(/\n\s*\n/g, '\n\n')
+      .replace(/[ \t]+/g, ' ')
+      .trim();
+
+    return text;
+  }
+
+  // ========== 浏览器辅助方法（人工辅助模式）==========
+
+  /**
+   * Research Agent - 浏览器访问（人工辅助）
+   * 打开浏览器让用户手动登录/处理验证码
+   */
+  async researchBrowserVisit(task, context) {
+    const { url, extractText, screenshot } = task;
+    if (!url) {
+      throw new Error('浏览器访问需要指定 url');
+    }
+
+    try {
+      const result = await this.browserAssistant.visit(url, {
+        extractText: extractText !== false,
+        screenshot: screenshot || false
+      });
+
+      // 如果需要人工操作
+      if (result.needLogin || result.needCaptcha) {
+        return this.formatResult('research', task, {
+          action: 'browser_visit',
+          url: url,
+          success: false,
+          needHumanAction: true,
+          needLogin: result.needLogin || false,
+          needCaptcha: result.needCaptcha || false,
+          message: result.message,
+          pendingAction: result.pendingAction,
+          instruction: result.pendingAction?.message || '请在浏览器窗口中完成操作'
+        });
+      }
+
+      return this.formatResult('research', task, {
+        action: 'browser_visit',
+        url: result.url,
+        success: true,
+        content: result.content,
+        title: result.title,
+        screenshot: result.screenshot,
+        contentLength: result.contentLength
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
+  /**
+   * Research Agent - 确认人工操作完成
+   * 用户完成登录/验证码后调用
+   */
+  async researchBrowserConfirm(task, context) {
+    const { extractText, screenshot } = task;
+
+    try {
+      const result = await this.browserAssistant.confirmHumanAction({
+        extractText: extractText !== false,
+        screenshot: screenshot || false
+      });
+
+      return this.formatResult('research', task, {
+        action: 'browser_confirm',
+        success: result.success,
+        url: result.url,
+        content: result.content,
+        title: result.title,
+        screenshot: result.screenshot,
+        contentLength: result.contentLength
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
+  /**
+   * Research Agent - 执行浏览器操作
+   */
+  async researchBrowserAction(task, context) {
+    const { action } = task;
+
+    if (!action) {
+      throw new Error('浏览器操作需要指定 action');
+    }
+
+    try {
+      const result = await this.browserAssistant.performAction(action);
+
+      return this.formatResult('research', task, {
+        action: 'browser_action',
+        success: result.success,
+        message: result.message,
+        screenshot: result.screenshot
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
+  /**
+   * Research Agent - 获取浏览器状态
+   */
+  async researchBrowserStatus(task, context) {
+    try {
+      const status = this.browserAssistant.getStatus();
+
+      return this.formatResult('research', task, {
+        action: 'browser_status',
+        success: true,
+        ...status
+      });
+
+    } catch (error) {
+      return this.formatResult('research', task, null, error);
+    }
+  }
+
   /**
    * 验证任务参数
    */
@@ -1343,6 +2043,99 @@ class AgentExecutor {
   getIPCStats() {
     if (!this.enableCrossPlatform) return null;
     return this.ipcChannel.getStats();
+  }
+
+  // ===== P1: 检查点恢复方法 =====
+
+  /**
+   * 从检查点恢复执行
+   * @param {string} checkpointId - 检查点 ID
+   * @param {Object} options - 恢复选项
+   * @returns {Promise<Object>} - 恢复执行结果
+   */
+  async restoreFromCheckpoint(checkpointId, options = {}) {
+    this.logger.info(`从检查点恢复: ${checkpointId}`);
+
+    // 加载检查点
+    const checkpoint = await this.checkpointManager.loadCheckpoint(checkpointId);
+    if (!checkpoint) {
+      throw new Error(`检查点不存在: ${checkpointId}`);
+    }
+
+    // 验证检查点状态
+    if (checkpoint.status !== 'failed' && checkpoint.status !== 'paused') {
+      throw new Error(`检查点状态不支持恢复: ${checkpoint.status}`);
+    }
+
+    const { task, agentId, context, partialResult } = checkpoint.context;
+    const sessionId = checkpoint.sessionId || 'default-session';
+
+    this.logger.info(`恢复任务: ${task.id || 'unknown'}, Agent: ${agentId}`);
+
+    // 使用保存的上下文重新执行
+    try {
+      const result = await this._executeSingle(
+        agentId,
+        task,
+        {
+          ...context,
+          sessionId,
+          isRecovery: true,
+          previousCheckpointId: checkpointId,
+          partialResult
+        }
+      );
+
+      // 恢复成功，清理检查点
+      if (result.success) {
+        await this.checkpointManager.deleteCheckpoint(checkpointId);
+        this.logger.info(`检查点已清理: ${checkpointId}`);
+      }
+
+      return {
+        success: true,
+        result,
+        recoveredFrom: checkpointId
+      };
+
+    } catch (error) {
+      this.logger.error(`恢复失败: ${error.message}`);
+      return {
+        success: false,
+        error: error.message,
+        checkpointId
+      };
+    }
+  }
+
+  /**
+   * 获取可恢复的检查点列表
+   * @param {Object} filter - 筛选条件
+   * @returns {Promise<Array>} - 检查点列表
+   */
+  async getRecoverableCheckpoints(filter = {}) {
+    const checkpoints = await this.checkpointManager.listCheckpoints({
+      status: ['failed', 'paused'],
+      ...filter
+    });
+    return checkpoints;
+  }
+
+  /**
+   * 获取 Token 使用统计
+   * @returns {Object} - Token 统计数据
+   */
+  getTokenStats() {
+    return this.tokenTracker.getUsageStats();
+  }
+
+  /**
+   * 检查 Token 预算状态
+   * @param {string} level - 预算级别 (task/session/daily/monthly)
+   * @returns {Object} - 预算检查结果
+   */
+  checkTokenBudget(level = 'session') {
+    return this.tokenTracker.checkBudget(level);
   }
 }
 

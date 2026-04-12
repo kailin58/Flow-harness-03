@@ -38,7 +38,7 @@ class TaskAnalyzer {
   classifyTask(taskMessage) {
     const message = taskMessage.toLowerCase();
 
-    // 按优先级匹配（从具体到一般）
+    // 按 taskPatterns 中定义的优先级顺序匹配（research 排在末尾，优先级最低）
     for (const [type, patterns] of Object.entries(this.taskPatterns)) {
       for (const pattern of patterns) {
         if (message.includes(pattern)) {
@@ -111,6 +111,12 @@ class TaskAnalyzer {
         criteria.push('安全扫描通过');
         criteria.push('无敏感信息泄露');
         break;
+
+      case 'research':
+        criteria.push('找到相关信息');
+        criteria.push('信息来源可靠');
+        criteria.push('信息与需求相关');
+        break;
     }
 
     // 检查是否涉及核心模块
@@ -163,6 +169,7 @@ class TaskAnalyzer {
       'documentation': 1,
       'testing': 2,
       'security': 4,
+      'research': 2,
       'general': 2
     };
     score += typeComplexity[taskType] || 2;
@@ -253,6 +260,7 @@ class TaskAnalyzer {
   // ========== 辅助方法 ==========
 
   initializePatterns() {
+    // 注意：按优先级从高到低排列，前面的类型优先匹配
     return {
       'bug_fix': ['bug', '修复', '错误', '问题', 'fix', 'issue', '不工作', '失败'],
       'feature': ['功能', '实现', '添加', '新增', 'feature', 'add', '开发'],
@@ -260,8 +268,27 @@ class TaskAnalyzer {
       'documentation': ['文档', '说明', '注释', 'doc', 'readme', '文档'],
       'testing': ['测试', 'test', '单元测试', '集成测试'],
       'security': ['安全', '漏洞', '权限', 'security', 'vulnerability', '加密'],
-      'performance': ['性能', '优化', '加速', 'performance', 'optimize'],
-      'deployment': ['部署', '发布', '上线', 'deploy', 'release']
+      'performance': ['性能', '加速', 'performance', 'optimize'],
+      'deployment': ['部署', '发布', '上线', 'deploy', 'release'],
+      // research 优先级最低，避免与常规任务类型冲突
+      // 包含：资料搜索、网络搜索、电商搜索、社交平台、数据采集等
+      'research': [
+        // 资料搜索
+        '查找资料', '查找文档', '调研', '研究', 'lookup', 'find doc',
+        // 网络搜索
+        '查阅', '参考', 'search the web', '上网查', '上网搜索', '搜索资料', '查询文档',
+        '搜索网络', '网上找', '网上搜',
+        // 电商搜索
+        '淘宝', '京东', '拼多多', '亚马逊', '电商', '店铺', '商品',
+        // 社交平台
+        '微信', '微博', '抖音', 'tiktok', '小红书', 'b站', 'bilibili', '知乎',
+        '快手', 'facebook', 'twitter', 'instagram', 'linkedin', 'youtube',
+        '朋友圈', '公众号', '视频号', '直播间',
+        // 数据采集
+        '爬取', '抓取', '数据采集', '获取数据', '抓数据',
+        // 网页操作
+        '网页', '网站', '访问网页', '打开网页'
+      ]
     };
   }
 

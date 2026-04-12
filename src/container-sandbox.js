@@ -742,12 +742,14 @@ class ContainerSandbox {
 
     // 处理挂载 — 将文件复制到隔离目录
     for (const mount of this.mounts) {
-      if (mount.type !== MOUNT_TYPE.TMPFS && fs.existsSync(mount.source)) {
+      // 确保 mount.source 是有效的字符串路径
+      const sourcePath = mount.source;
+      if (mount.type !== MOUNT_TYPE.TMPFS && sourcePath && typeof sourcePath === 'string' && fs.existsSync(sourcePath)) {
         const destDir = path.join(vmRoot, 'workspace', path.basename(mount.target));
         try {
-          fs.cpSync(mount.source, destDir, { recursive: true });
+          fs.cpSync(sourcePath, destDir, { recursive: true });
         } catch (e) {
-          this.logger.warn({ source: mount.source, error: e.message }, 'VM mount copy warning');
+          this.logger.warn({ source: sourcePath, error: e.message }, 'VM mount copy warning');
         }
       }
     }

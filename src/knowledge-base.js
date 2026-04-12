@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { createLogger } = require('./logger');
 
 class KnowledgeBase {
   constructor(knowledgePath = '.flowharness/knowledge') {
@@ -8,6 +9,7 @@ class KnowledgeBase {
     this.metricsFile = path.join(knowledgePath, 'metrics.json');
     this.patterns = null;
     this.metrics = null;
+    this.logger = createLogger({ name: 'knowledge-base' });
   }
 
   load() {
@@ -403,6 +405,326 @@ class KnowledgeBase {
         by_day: {}
       }
     };
+  }
+
+  // ----------------------------------------------------------
+  // Spec 文件支持 (Phase G: 借鉴 ai-website-cloner)
+  // ----------------------------------------------------------
+
+  /**
+   * 写入 Spec 文件
+   * @param {string} specName - Spec 名称
+   * @param {Object} spec - Spec 内容
+   * @param {Object} options - 可选配置
+   * @returns {Object} Spec 文件路径和可复用性评分
+   */
+  writeSpec(specName, spec, options = {}) {
+    const specDir = path.join(this.knowledgePath, 'specs');
+
+    // 确保目录存在
+    if (!fs.existsSync(specDir)) {
+      fs.mkdirSync(specDir, { recursive: true });
+    }
+
+    const specPath = path.join(specDir, `${specName}.json`);
+
+    // 计算可复用性评分
+    const reusability = this.calculateReusability(spec);
+
+    const specData = {
+      name: specName,
+      version: '1.0',
+      createdAt: new Date().toISOString(),
+      spec: spec,
+      metadata: {
+        taskType: options.taskType || 'unknown',
+        successRate: options.successRate || null,
+        reusability: reusability
+      }
+    };
+
+    fs.writeFileSync(specPath, JSON.stringify(specData, null, 2), 'utf8');
+
+    return {
+      path: specPath,
+      name: specName,
+      reusability: reusability
+    };
+  }
+
+  /**
+   * 读取 Spec 文件
+   * @param {string} specName - Spec 名称
+   * @returns {Object|null} Spec 内容
+   */
+  readSpec(specName) {
+    const specPath = path.join(this.knowledgePath, 'specs', `${specName}.json`);
+
+    if (!fs.existsSync(specPath)) {
+      return null;
+    }
+
+    return JSON.parse(fs.readFileSync(specPath, 'utf8'));
+  }
+
+  /**
+   * 列出所有 Spec
+   * @returns {Array} Spec 列表
+   */
+  listSpecs() {
+    const specDir = path.join(this.knowledgePath, 'specs');
+
+    if (!fs.existsSync(specDir)) {
+      return [];
+    }
+
+    return fs.readdirSync(specDir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => {
+        const spec = JSON.parse(fs.readFileSync(path.join(specDir, f), 'utf8'));
+        return {
+          name: spec.name,
+          taskType: spec.metadata?.taskType,
+          reusability: spec.metadata?.reusability,
+          createdAt: spec.createdAt
+        };
+      });
+  }
+
+  /**
+   * 删除 Spec 文件
+   * @param {string} specName - Spec 名称
+   * @returns {boolean} 是否成功删除
+   */
+  deleteSpec(specName) {
+    const specPath = path.join(this.knowledgePath, 'specs', `${specName}.json`);
+
+    if (fs.existsSync(specPath)) {
+      fs.unlinkSync(specPath);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 计算可复用性评分
+   * @param {Object} spec - Spec 内容
+   * @returns {number} 0-1 的可复用性评分
+   */
+  calculateReusability(spec) {
+    let score = 0;
+
+    // 有明确的输入输出定义 +0.3
+    if (spec.inputs && Object.keys(spec.inputs).length > 0) score += 0.15;
+    if (spec.outputs && Object.keys(spec.outputs).length > 0) score += 0.15;
+
+    // 有依赖说明 +0.2
+    if (spec.dependencies && spec.dependencies.length > 0) score += 0.2;
+
+    // 有示例 +0.2
+    if (spec.examples && spec.examples.length > 0) score += 0.2;
+
+    // 有验收标准 +0.3
+    if (spec.acceptanceCriteria && spec.acceptanceCriteria.length > 0) score += 0.3;
+
+    return Math.min(1, Math.round(score * 100) / 100);
+  }
+
+  /**
+   * 导出 Spec 数据
+   * @param {Object} options - 导出选项
+   * @returns {Array} 导出的 Spec 列表
+   */
+  exportSpecs(options = {}) {
+    const specs = this.listSpecs();
+    const minReusability = options.minReusability || 0.5;
+
+    return specs
+      .filter(s => s.reusability >= minReusability)
+      .map(s => this.readSpec(s.name));
+  }
+
+  // ----------------------------------------------------------
+  // 归档功能
+  // ----------------------------------------------------------
+
+  /**
+   * 归档超限的 metrics 数据
+   * 将旧条目迁移到按月归档文件，保留最新 MAX_ENTRIES 条
+   */
+  async archiveOldMetrics(maxEntries = 500) {
+    const metricsPath = this.metricsFile;
+    if (!fs.existsSync(metricsPath)) return { archived: 0 };
+
+    const raw = fs.readFileSync(metricsPath, 'utf8');
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return { archived: 0, error: 'metrics.json parse failed' };
+    }
+
+    // 查找所有数组类型的顶层字段
+    let totalArchived = 0;
+    const archiveDir = path.join(this.knowledgePath, 'archive');
+    if (!fs.existsSync(archiveDir)) {
+      fs.mkdirSync(archiveDir, { recursive: true });
+    }
+
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    for (const key of Object.keys(data)) {
+      if (Array.isArray(data[key]) && data[key].length > maxEntries) {
+        const overflow = data[key].slice(0, data[key].length - maxEntries);
+        data[key] = data[key].slice(-maxEntries);
+        totalArchived += overflow.length;
+
+        // 追加写入归档文件
+        const archivePath = path.join(archiveDir, `metrics_${key}_${monthKey}.json`);
+        let archiveData = [];
+        if (fs.existsSync(archivePath)) {
+          try { archiveData = JSON.parse(fs.readFileSync(archivePath, 'utf8')); } catch (error) {
+            this.logger.warn(`Failed to parse archive file ${archivePath}: ${error.message}`);
+          }
+        }
+        archiveData.push(...overflow);
+        fs.writeFileSync(archivePath, JSON.stringify(archiveData, null, 2));
+      }
+    }
+
+    // 回写精简后的 metrics.json
+    fs.writeFileSync(metricsPath, JSON.stringify(data, null, 2));
+
+    return { archived: totalArchived, remaining: JSON.stringify(data).length };
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  命名空间共享知识层（Shared Knowledge Bus）
+  //
+  //  设计原则：
+  //   - 写入：每个命名空间归属固定 Agent，只有 owner 可写（Write-Owned）
+  //   - 读取：任意 Agent 可以无限制读取任何命名空间（Read-All）
+  //   - 用途：替代跨 Agent 直接通信，消除信息孤岛
+  //
+  //  命名空间归属：
+  //   codebase  → explore    （代码库探索结果）
+  //   plans     → plan       （方案设计结果）
+  //   changes   → general    （执行变更记录）
+  //   quality   → inspector  （质检结果）
+  //   external  → research   （外部知识）
+  //   decisions → supervisor （CEO决策与广播）
+  // ══════════════════════════════════════════════════════════════
+
+  /**
+   * 命名空间所有权表（静态，不可在运行时修改）
+   */
+  static get NS_OWNERS() {
+    return {
+      codebase:  'explore',
+      plans:     'plan',
+      changes:   'general',
+      quality:   'inspector',
+      external:  'research',
+      decisions:  'supervisor',
+      schedules:  'supervisor',  // 定时任务记忆层，CEO独占写入
+      compliance: 'supervisor'   // 合规审计日志，CEO独占写入
+    };
+  }
+
+  /**
+   * 向命名空间写入数据（Write-Owned：仅 owner 可写）
+   *
+   * @param {string} namespace - 命名空间（见 NS_OWNERS）
+   * @param {string} key       - 数据键
+   * @param {*}      data      - 写入内容
+   * @param {string} writerId  - 写入方 Agent ID（必须是该命名空间 owner）
+   * @returns {{ ok: boolean, path: string }}
+   */
+  writeShared(namespace, key, data, writerId) {
+    const owner = KnowledgeBase.NS_OWNERS[namespace];
+    if (!owner) {
+      throw new Error(`[KB] 未知命名空间: "${namespace}"，合法值: ${Object.keys(KnowledgeBase.NS_OWNERS).join(', ')}`);
+    }
+    if (writerId !== owner) {
+      throw new Error(`[KB] 写入拒绝：命名空间 "${namespace}" 归属 "${owner}"，"${writerId}" 无写入权限`);
+    }
+
+    const nsDir  = path.join(this.knowledgePath, 'shared', namespace);
+    const nsFile = path.join(nsDir, `${key}.json`);
+
+    if (!fs.existsSync(nsDir)) {
+      fs.mkdirSync(nsDir, { recursive: true });
+    }
+
+    const entry = {
+      namespace,
+      key,
+      owner,
+      data,
+      writtenAt: new Date().toISOString(),
+      writtenBy: writerId
+    };
+
+    fs.writeFileSync(nsFile, JSON.stringify(entry, null, 2), 'utf8');
+    return { ok: true, path: nsFile };
+  }
+
+  /**
+   * 从命名空间读取数据（Read-All：任意 Agent 可读）
+   *
+   * @param {string} namespace - 命名空间
+   * @param {string} key       - 数据键
+   * @param {string} [readerId] - 可选，仅用于审计日志
+   * @returns {{ data: *, writtenAt: string, writtenBy: string } | null}
+   */
+  readShared(namespace, key, readerId) {
+    const nsFile = path.join(this.knowledgePath, 'shared', namespace, `${key}.json`);
+    if (!fs.existsSync(nsFile)) return null;
+
+    try {
+      const raw   = fs.readFileSync(nsFile, 'utf8');
+      const entry = JSON.parse(raw);
+      return {
+        data:      entry.data,
+        writtenAt: entry.writtenAt,
+        writtenBy: entry.writtenBy,
+        namespace: entry.namespace,
+        key:       entry.key
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 列出某命名空间下的所有 key
+   *
+   * @param {string} namespace
+   * @returns {string[]}
+   */
+  listShared(namespace) {
+    const nsDir = path.join(this.knowledgePath, 'shared', namespace);
+    if (!fs.existsSync(nsDir)) return [];
+    return fs.readdirSync(nsDir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => f.replace(/\.json$/, ''));
+  }
+
+  /**
+   * 读取某命名空间的全部内容（Read-All）
+   *
+   * @param {string} namespace
+   * @returns {Object} { [key]: entry }
+   */
+  readAllShared(namespace) {
+    const keys = this.listShared(namespace);
+    const result = {};
+    for (const key of keys) {
+      result[key] = this.readShared(namespace, key);
+    }
+    return result;
   }
 }
 

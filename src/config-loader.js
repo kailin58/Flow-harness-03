@@ -17,8 +17,14 @@ class ConfigLoader {
       }
 
       const fileContents = fs.readFileSync(fullPath, 'utf8');
-      this.config = yaml.load(fileContents);
+      const loaded = yaml.load(fileContents);
 
+      // 验证加载结果为有效对象
+      if (!loaded || typeof loaded !== 'object' || Array.isArray(loaded)) {
+        throw new Error('Config file must contain a valid YAML object');
+      }
+
+      this.config = loaded;
       this.validate();
       return this.config;
     } catch (error) {

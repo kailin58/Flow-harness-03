@@ -17,7 +17,7 @@ function testTaskAnalyzer() {
     const analyzer = new TaskAnalyzer();
     assert(analyzer !== null, 'TaskAnalyzer 创建成功');
     assert(typeof analyzer.taskPatterns === 'object', '任务模式已初始化');
-    assert(Object.keys(analyzer.taskPatterns).length === 8, '8 种任务类型');
+    assert(Object.keys(analyzer.taskPatterns).length === 9, '9 种任务类型（含 research）');
 
     // ---- Test 2: Bug修复分类 ----
     console.log('\nTest 2: Bug修复分类');

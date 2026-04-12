@@ -1,3 +1,4 @@
+const path = require('path');
 const ConfigLoader = require('./config-loader');
 const KnowledgeBase = require('./knowledge-base');
 const TaskAnalyzer = require('./task-analyzer');
@@ -11,18 +12,67 @@ const { ReviewLoop } = require('./review-loop');
 const { createLogger } = require('./logger');
 const { DiagnosticProtocol } = require('./diagnostic-protocol');
 const { EvolutionEngine } = require('./evolution-engine');
+const { HookEngine } = require('./hook-engine');
+const { SkillLoader } = require('./skill-loader');
+const { StorageManager } = require('./storage-manager');
+const PolicyChecker = require('./policy-checker');
+const ExecutionMonitor = require('./execution-monitor');
+const AutoRetry = require('./auto-retry');
+const QualityGate = require('./quality-gate');
+const { CheckpointManager } = require('./checkpoint-manager');
+const { ProjectOnboarding } = require('./project-onboarding');
+const { DocGenerator } = require('./doc-generator');
+const { ConflictResolver } = require('./conflict-resolver');
+const { MultiModelRouter } = require('./multi-model-router');
+const { SandboxEnhanced, SANDBOX_PROFILE } = require('./sandbox-enhanced');
+const { TeamCollaboration } = require('./team-collaboration');
+const DeliberationEngine  = require('./deliberation-engine');
+const ScheduleMemory      = require('./schedule-memory');
+const ComplianceChecker   = require('./compliance-checker');
+const CommRouter          = require('./comm-router');
+
+/**
+ * 默认配置常量
+ */
+const DEFAULTS = {
+  MAX_REWORK_ATTEMPTS: 2,      // 最大重做次数
+  REVIEW_SCORE_THRESHOLD: 7.0, // 复盘评分阈值
+  MAX_OPTIMIZE_ITERATIONS: 3   // 最大优化迭代次数
+};
 
 class SupervisorAgent {
-  constructor(config) {
-    this.config = config;
-    this.logger = createLogger({ name: 'supervisor' });
-    this.knowledgeBase = new KnowledgeBase();
-    this.taskAnalyzer = new TaskAnalyzer();
-    this.taskDecomposer = new TaskDecomposer();
+  /**
+   * @param {string|Object} config  - 配置文件路径或配置对象
+   * @param {Object} [options]
+   * @param {string} [options.projectRoot]  - 业务项目根目录（默认 process.cwd()）
+   * @param {string} [options.globalRoot]   - 框架全局数据根目录（默认 ~/.flowharness）
+   */
+  constructor(config, options = {}) {
+    // ── StorageManager：零足迹路径统一管理 ──────────────────────
+    this.storage = new StorageManager({
+      projectRoot: options.projectRoot,
+      globalRoot:  options.globalRoot
+    });
+    this.storage.ensureDirs();
 
-    // 初始化 Agent Registry（必须在 TaskDispatcher 之前）
+    // ── 配置加载（全局 > 项目覆盖 > 旧版项目内配置） ───────────
+    const resolvedConfig = this.resolveConfig(config);
+    this.config = resolvedConfig.config;
+    this.configPath = resolvedConfig.configPath;
+    this.logger = createLogger({ name: 'supervisor' });
+
+    // ── 知识库：数据存在全局目录，与业务项目隔离 ────────────────
+    this.knowledgeBase = new KnowledgeBase(this.storage.knowledgeDir);
+
+    // ── Layer 1: 任务编排层 ──────────────────────────────────────
+    // 1+5 架构：1 CEO + 5 总监（explore/plan/general/inspector/research）
+    // step1_analyze → step2_decompose → step3_assign → (商议) → step4_execute
+    this.taskAnalyzer = new TaskAnalyzer();
+    this.taskDecomposer = new TaskDecomposer({ knowledgeBase: this.knowledgeBase });
+
+    // 初始化 Agent Registry（写死 6 个核心角色，不可增减）
     this.agentRegistry = new AgentRegistry();
-    this.agentRegistry.initializeCoreAgents();
+    this.agentRegistry.initializeCoreAgents();  // 1 CEO + 5 总监 = 6 个角色
 
     // 传入 agentRegistry 到 TaskDispatcher
     this.taskDispatcher = new TaskDispatcher(this.agentRegistry);
@@ -30,16 +80,19 @@ class SupervisorAgent {
 
     // 初始化 AgentExecutor
     this.agentExecutor = new AgentExecutor(this.agentRegistry);
+    // ────────────────────────────────────────────────────────────
 
-    // 初始化 AGENTS.md 运行时解析器
+    // 初始化 AGENTS.md 运行时解析器（从业务项目根读取，只读不写）
     this.agentsParser = new AgentsParser();
     this.agentsParser.parse();
 
-    // 初始化复盘闭环引擎
+    // ── Layer 6: 反馈闭环层 ──────────────────────────────────────
+    // step6_review: 6a回顾 → 6b优化 → 6c验证 → 6d固化，循环直到满意
+    const cfgObj = (config && typeof config === 'object') ? config : {};
     this.reviewLoop = new ReviewLoop({
       knowledgeBase: this.knowledgeBase,
-      scoreThreshold: config.reviewThreshold || 7.0,
-      maxIterations: config.maxOptimizeIterations || 3
+      scoreThreshold: cfgObj.reviewThreshold || 7.0,
+      maxIterations: cfgObj.maxOptimizeIterations || 3
     });
 
     // 初始化问题诊断协议
@@ -52,8 +105,257 @@ class SupervisorAgent {
       knowledgeBase: this.knowledgeBase
     });
 
+    // ── 技能加载：全局技能目录 + 项目私有技能覆盖 ───────────────
+    this.skillLoader = new SkillLoader({
+      rootDir:          this.storage.projectRoot,
+      globalSkillsDir:  this.storage.globalSkillsDir,
+      projectSkillsDir: this.storage.projectSkillsDir
+    });
+
+    this.hookEngine = new HookEngine(this.config, {
+      knowledgeBase: this.knowledgeBase,
+    });
+
+    this.checkpointManager = new CheckpointManager({
+      storageDir: config.checkpointDir || '.flowharness/checkpoints',
+      maxCheckpoints: config.maxCheckpoints || 20
+    });
+
+    // ── Layer 2: 安全策略层 ──────────────────────────────────────
+    this.policyChecker = new PolicyChecker(this.config.policies || {});
+
+    // ── Layer 3: 执行监控层 ──────────────────────────────────────
+    this.executionMonitor = new ExecutionMonitor(this.config.monitoring || {});
+    this.autoRetry = new AutoRetry(this.config.retry || {});
+
+    // ── Layer 4: Inspector 检查层 ────────────────────────────────
+    // step5_inspect: Inspector 深度检查（目标对齐/完整性/质量/风险/时间）
+    // this.inspector 已在 Layer 1 段初始化（与 agentRegistry 同生命周期）
+
+    // ── Layer 5: 质量门禁层 ──────────────────────────────────────
+    this.qualityGate = new QualityGate(this.config.quality || {});
+
+    // ── P1: 项目接入自动化 ───────────────────────────────────────
+    this.projectOnboarding = new ProjectOnboarding({
+      projectRoot: this.storage.projectRoot,
+      logger: this.logger.child({ component: 'onboarding' })
+    });
+
+    // ── P1: 文档生成器 ───────────────────────────────────────────
+    this.docGenerator = new DocGenerator({
+      srcDir: path.join(this.storage.projectRoot, 'src'),
+      outputDir: path.join(this.storage.projectRoot, 'docs'),
+      logger: this.logger.child({ component: 'doc-generator' })
+    });
+
+    this._parallelExecutor = null;
     this.currentTask = null;
     this.executionLog = [];
+
+    // ── P1: 多工具冲突解决器 ─────────────────────────────────────
+    this.conflictResolver = new ConflictResolver({
+      defaultStrategy: 'priority',
+      logger: this.logger.child({ component: 'conflict-resolver' })
+    });
+
+    // 注册默认工具优先级
+    this._registerDefaultToolPriorities();
+
+    // ── 商议引擎（多 Agent 共识）───────────────────────────────────
+    this.deliberationEngine = new DeliberationEngine(
+      this.agentRegistry,
+      this.knowledgeBase
+    );
+
+    // ── 定时任务记忆层（5层：Registry/ExecutionLog/StateStore/FailureMemory/ContextSnapshot）
+    this.scheduleMemory = new ScheduleMemory(this.knowledgeBase);
+
+    // ── 合规检查器（3层：来源校验 → 许可证 → CVE）
+    this.complianceChecker = new ComplianceChecker(this.knowledgeBase);
+
+    // ── 通信路由器（1+5 架构通信规则强制执行）────────────────────
+    // 规则: CEO↔总监 直连 | 总监↔总监 必须CEO在场 | 禁止越级/跨部门
+    // strict:false → 违规记录警告但不中断流程（测试模式可改为 true 阻断）
+    this.commRouter = new CommRouter(this.agentRegistry, { strict: false, logAll: false });
+  }
+
+  /**
+   * 注册默认工具优先级
+   */
+  _registerDefaultToolPriorities() {
+    // 按照文档定义的工具优先级
+    this.conflictResolver.registerToolPriority('supervisor', 100);
+    this.conflictResolver.registerToolPriority('claude-code', 80);
+    this.conflictResolver.registerToolPriority('cursor', 70);
+    this.conflictResolver.registerToolPriority('codex', 60);
+  }
+
+  /**
+   * 检查工具冲突
+   */
+  _checkToolConflicts(decomposition) {
+    if (!this.conflictResolver) return [];
+
+    const conflicts = [];
+    const taskTypes = new Set();
+
+    for (const subtask of decomposition.subtasks) {
+      if (subtask.type) {
+        taskTypes.add(subtask.type);
+      }
+    }
+
+    // 检查是否有多个工具请求同一类型任务
+    for (const type of taskTypes) {
+        const providers = this.conflictResolver.getProvidersForCapability(type);
+        if (providers && providers.length > 1) {
+          conflicts.push({
+            type: 'tool_conflict',
+            taskType: type,
+            providers: providers,
+            resolution: this.conflictResolver.resolve({
+              type: 'capability',
+              capability: type
+            })
+          });
+        }
+      }
+
+      if (conflicts.length > 0) {
+        this.logger.info(`   检测到 ${conflicts.length} 个工具冲突`);
+      }
+
+    return conflicts;
+  }
+
+  // ========== P2: 增强功能集成 ==========
+
+  /**
+   * 初始化多模型路由器
+   * @param {Object} options - 配置选项
+   */
+  initMultiModelRouter(options = {}) {
+    this.multiModelRouter = new MultiModelRouter({
+      defaultStrategy: options.strategy || 'task_match',
+      maxRetries: options.maxRetries || 3,
+      logger: this.logger.child({ component: 'multi-model-router' })
+    });
+
+    // 注册默认模型
+    if (options.models) {
+      for (const model of options.models) {
+        this.multiModelRouter.registerModel(model);
+      }
+    }
+
+    return this.multiModelRouter;
+  }
+
+  /**
+   * 路由到最佳模型
+   * @param {string} taskType - 任务类型
+   * @param {Object} context - 上下文
+   */
+  routeToModel(taskType, context = {}) {
+    if (!this.multiModelRouter) {
+      this.initMultiModelRouter();
+    }
+    return this.multiModelRouter.route(taskType, context);
+  }
+
+  /**
+   * 初始化增强沙箱
+   * @param {string} profile - 沙箱配置 (strict/standard/permissive)
+   */
+  initSandboxEnhanced(profile = 'standard') {
+    this.sandboxEnhanced = new SandboxEnhanced({
+      profile: SANDBOX_PROFILE[profile.toUpperCase()] || SANDBOX_PROFILE.STANDARD,
+      logger: this.logger.child({ component: 'sandbox-enhanced' })
+    });
+    return this.sandboxEnhanced;
+  }
+
+  /**
+   * 创建沙箱实例
+   * @param {Object} options - 沙箱选项
+   */
+  async createSandbox(options = {}) {
+    if (!this.sandboxEnhanced) {
+      this.initSandboxEnhanced(options.profile || 'standard');
+    }
+    return this.sandboxEnhanced.create(options);
+  }
+
+  /**
+   * 初始化团队协作
+   * @param {string} teamName - 团队名称
+   * @param {Object} options - 配置选项
+   */
+  initTeamCollaboration(teamName, options = {}) {
+    this.teamCollaboration = new TeamCollaboration(teamName, {
+      storagePath: options.storagePath || path.join(this.storage.harnessDir, 'team'),
+      ...options
+    });
+    return this.teamCollaboration;
+  }
+
+  /**
+   * 获取团队统计
+   */
+  getTeamStats() {
+    if (!this.teamCollaboration) return null;
+    return this.teamCollaboration.getStats();
+  }
+
+  /**
+   * 获取通信路由审计日志（验证 1+5 通信规则合规性）
+   * @param {number} [limit=50]
+   */
+  getCommAuditLog(limit = 50) {
+    return this.commRouter.getAuditLog(limit);
+  }
+
+  /**
+   * 获取通信违规统计
+   */
+  getCommViolations() {
+    return this.commRouter.getViolationStats();
+  }
+
+  resolveConfig(config) {
+    if (typeof config === 'string' && config.trim()) {
+      const loader = new ConfigLoader(config);
+      return {
+        config: loader.load(),
+        configPath: config
+      };
+    }
+
+    if (config && typeof config === 'object') {
+      return {
+        config,
+        configPath: null
+      };
+    }
+
+    // 自动从 StorageManager 解析配置路径
+    const autoConfigPath = this.storage.resolveConfigPath();
+    if (autoConfigPath) {
+      try {
+        const loader = new ConfigLoader(autoConfigPath);
+        return {
+          config: loader.load(),
+          configPath: autoConfigPath
+        };
+      } catch {
+        // 配置文件不合法，使用空配置
+      }
+    }
+
+    return {
+      config: {},
+      configPath: null
+    };
   }
 
   /**
@@ -83,19 +385,99 @@ class SupervisorAgent {
       let assignment = await this.step3_assign(decomposition);
       this.logStep(3, 'assign', assignment);
 
+      // ── Step 3b: 商议 — 执行前多 Agent 共识 ──────────────────────
+      if (this.deliberationEngine.shouldDeliberateTask(analysis, assignment)) {
+        const deliberation = await this.deliberationEngine.deliberateTask(assignment, analysis);
+        this.logStep(3, 'deliberate', deliberation);
+        this.logger.info(DeliberationEngine.formatSummary(deliberation));
+
+        if (deliberation.decision === DeliberationEngine.DECISION.ABORT) {
+          throw new Error(`[商议] 全员共识: 方案不可行，放弃执行。最优解得分: ${deliberation.optimal.totalScore.toFixed(3)}`);
+        }
+        if (deliberation.decision === DeliberationEngine.DECISION.ESCALATE) {
+          this.logger.warn('[商议] 共识: 建议人工介入，继续执行但标记为 supervised');
+          context.mode = 'supervised';
+        }
+        if (deliberation.decision === DeliberationEngine.DECISION.PROCEED_MODIFIED) {
+          // 若最优方案带 patch，应用到 assignment
+          const patch = deliberation.optimal.patch;
+          if (patch?.forceSerial) {
+            assignment.executionPlan.phases = assignment.executionPlan.phases
+              .map((ph, i) => ({ ...ph, tasks: ph.tasks }));   // 保留阶段，串行由 executor 处理
+            assignment.executionPlan._forceSerial = true;
+            this.logger.info('   [商议] 应用补丁: 强制串行执行');
+          }
+          if (patch?.slimAssignments) {
+            assignment.assignments = patch.slimAssignments;
+            this.logger.info(`   [商议] 应用补丁: 精简为 ${patch.slimAssignments.length} 个高优先级子任务`);
+          }
+        }
+      }
+      // ────────────────────────────────────────────────────────────
+
+      // Hook: pre_task
+      try {
+        await this.hookEngine.runHooks(HookEngine.LIFECYCLE.PRE_TASK, {
+          task: { type: analysis.type, message: taskMessage }
+        });
+      } catch (hookErr) {
+        this.logger.error(`Pre-task hook blocked execution: ${hookErr.message}`);
+        throw hookErr;
+      }
+
       // Step 4: 指挥 - 去干吧
-      let execution = await this.step4_execute(assignment);
+      let execution;
+      if (this.isParallelExecutionEnabled()) {
+        execution = await this.step4_execute_parallel(assignment);
+      } else {
+        execution = await this.step4_execute(assignment);
+      }
       this.logStep(4, 'execute', execution);
+
+      // Hook: post_task
+      try {
+        await this.hookEngine.runHooks(HookEngine.LIFECYCLE.POST_TASK, {
+          task: { type: analysis.type, message: taskMessage },
+          result: execution
+        });
+      } catch (hookErr) {
+        this.logger.warn(`Post-task hook error: ${hookErr.message}`);
+      }
 
       // Step 5: 检查 - 干得怎么样？
       let inspection = await this.step5_inspect(execution);
       this.logStep(5, 'inspect', inspection);
 
+      // ── Layer 5: 质量门禁层 — 检查通过后再过门禁 ──────────────
+      // 仅在 inspection 通过时运行，避免重做循环中重复触发
+      if (inspection.passed) {
+        try {
+          const gateResult = await this.qualityGate.check({
+            task: taskMessage,
+            projectRoot: this.storage.projectRoot,
+            executionResults: execution.results
+          });
+          this.logStep(5, 'quality_gate', gateResult);
+          if (!gateResult.passed) {
+            this.logger.warn(`[Layer5] 质量门禁未通过: ${(gateResult.blockers || []).map(b => b.reason).join('; ')}`);
+            // 门禁失败降级为警告（非阻断），在 review 里记录
+            inspection.qualityGate = gateResult;
+            inspection.qualityGateWarning = true;
+          } else {
+            this.logger.info('[Layer5] 质量门禁通过 ✓');
+            inspection.qualityGate = gateResult;
+          }
+        } catch (gateErr) {
+          this.logger.warn(`[Layer5] 质量门禁执行异常: ${gateErr.message}`);
+        }
+      }
+      // ────────────────────────────────────────────────────────────
+
       // ===== 打回重做闭环 =====
       // 文档 Ch7: "检查不通过就打回 — 重做或换工具"
       // 文档 Ch7 原则8: "2次不通过就必须停检 — 不能蛮干，必须换思路"
       let reworkCount = 0;
-      const maxReworks = 2;
+      const maxReworks = this.config.maxReworkAttempts || DEFAULTS.MAX_REWORK_ATTEMPTS;
 
       while (!inspection.passed && reworkCount < maxReworks) {
         reworkCount++;
@@ -155,6 +537,20 @@ class SupervisorAgent {
       }
       this.logger.info('');
 
+      // Hook: on_supervisor_stop
+      try {
+        await this.hookEngine.runHooks(HookEngine.LIFECYCLE.ON_SUPERVISOR_STOP, {
+          task: { type: analysis.type, message: taskMessage },
+          totalTime,
+          success: inspection.passed
+        });
+      } catch (hookError) {
+        this.logger.warn(`on_supervisor_stop hook failed: ${hookError.message}`);
+      }
+
+      // ===== P1: 自动进化记录 =====
+      await this._recordEvolution(analysis, inspection, totalTime, reworkCount);
+
       return {
         success: inspection.passed,
         task: taskMessage,
@@ -167,10 +563,21 @@ class SupervisorAgent {
 
     } catch (error) {
       this.logger.error(`\n❌ Supervisor 执行失败: ${error.message}`);
+
+      // ===== P1: 自动进化记录（失败） =====
+      if (this.currentTask && this.currentTask.analysis) {
+        await this._recordEvolution(
+          this.currentTask.analysis,
+          { passed: false, error: error.message },
+          Date.now() - this.currentTask.startTime,
+          0
+        );
+      }
+
       return {
         success: false,
         error: error.message,
-        steps: this.currentTask.steps
+        steps: this.currentTask ? this.currentTask.steps : []
       };
     }
   }
@@ -178,9 +585,25 @@ class SupervisorAgent {
   /**
    * Step 1: 判断 - 为什么干？
    * 分析任务类型、目标、验收标准
+   * Layer 2: 安全策略前置检查（deny-by-default）
    */
   async step1_analyze(taskMessage, context) {
     this.logger.info('📍 Step 1: 判断 - 为什么干？');
+
+    // ── Layer 2: 安全策略层 — 任务准入检查 ──────────────────────
+    // 在分析之前先检查任务是否符合安全策略，阻断不合规的操作意图
+    const role = context.role || this.config.policies?.defaultRole || null;
+    if (role) this.policyChecker.setRole(role);
+
+    const taskPolicyCheck = this.policyChecker.checkCommand
+      ? this.policyChecker.checkCommand(taskMessage)
+      : { allowed: true };
+
+    if (taskPolicyCheck && !taskPolicyCheck.allowed) {
+      this.logger.warn(`[Layer2] 安全策略拒绝任务: ${taskPolicyCheck.reason}`);
+      throw new Error(`安全策略拒绝: ${taskPolicyCheck.reason}`);
+    }
+    // ─────────────────────────────────────────────────────────────
 
     // 使用 TaskAnalyzer 进行深度分析
     const analysis = this.taskAnalyzer.analyze(taskMessage, context);
@@ -240,6 +663,20 @@ class SupervisorAgent {
     // 使用 TaskDispatcher 进行智能分配
     const assignment = this.taskDispatcher.assign(decomposition);
 
+    // ── 通信路由：CEO → 各总监（1+5 架构合规验证）────────────────
+    // CEO 分配任务给总监，符合直接上下级规则
+    assignment.assignments.forEach(item => {
+      const agentId = item.executor.agentId;
+      if (agentId && agentId !== 'supervisor') {
+        try {
+          this.commRouter.send('supervisor', agentId, { type: 'task_assign', subtask: item.subtask.name });
+        } catch {
+          // strict=false 时不会抛出，此 catch 仅作保险
+        }
+      }
+    });
+    // ────────────────────────────────────────────────────────────
+
     this.logger.info(`   执行计划:`);
     if (assignment.executionPlan.parallel.length > 0) {
       this.logger.info(`   并行任务: ${assignment.executionPlan.parallel.length} 组`);
@@ -264,87 +701,323 @@ class SupervisorAgent {
   /**
    * Step 4: 指挥 - 去干吧
    * 执行分配的任务
+   * Layer 3: ExecutionMonitor 全程监控 + AutoRetry 智能重试
    */
   async step4_execute(assignment) {
     this.logger.info('\n📍 Step 4: 指挥 - 去干吧');
 
-    const results = [];
-    let executedCount = 0;
     const totalCount = assignment.assignments.length;
-    const enableRetry = this.currentTask.context.enableRetry !== false; // 默认启用重试
-    const maxRetries = this.currentTask.context.maxRetries || 2; // 默认最多重试2次
+    const idToItem  = new Map(assignment.assignments.map(a => [a.subtask.id, a]));
 
-    for (const item of assignment.assignments) {
-      executedCount++;
-      this.logger.info(`   [${executedCount}/${totalCount}] 执行: ${item.subtask.name}`);
+    // ── P3: 按 executionPlan.phases 驱动执行顺序 ─────────────────
+    // phases 格式: [{ phase: 0, tasks: ['id1','id2'] }, { phase: 2, tasks: ['id3'] }, ...]
+    // 同 phase 内并行，跨 phase 串行
+    const phases = assignment.executionPlan?.phases;
 
-      // 检查是否需要用户授权
-      if (item.executor.config.requiresAuth) {
-        this.logger.info(`   ⚠️  此任务需要授权，当前自动批准（生产环境应请求用户确认）`);
-      }
+    let orderedGroups;
+    if (phases && phases.length > 0) {
+      orderedGroups = phases.map(p => p.tasks.map(id => idToItem.get(id)).filter(Boolean));
+    } else {
+      // 回退：全部串行（每任务一个 group）
+      orderedGroups = assignment.assignments.map(a => [a]);
+    }
+    // ─────────────────────────────────────────────────────────────
 
-      // 执行任务（带重试）
-      const startTime = Date.now();
-      let result = await this.executeTask(item);
-      let retryCount = 0;
+    const allResults = [];
+    let executedCount = 0;
 
-      // 重试逻辑
-      while (!result.success && result.retryable && enableRetry && retryCount < maxRetries) {
-        retryCount++;
-        this.logger.info(`   🔄 重试 ${retryCount}/${maxRetries}: ${item.subtask.name}`);
-
-        // 短暂延迟后重试
-        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
-
-        result = await this.executeTask(item);
-      }
-
-      const executionTime = Date.now() - startTime;
-      result.executionTime = executionTime;
-      result.retryCount = retryCount;
-      results.push(result);
-
-      if (result.success) {
-        const retryInfo = retryCount > 0 ? ` (重试${retryCount}次后成功)` : '';
-        this.logger.info(`   ✓ 完成 (${executionTime}ms)${retryInfo}`);
-        if (result.output) {
-          this.logger.info(`   📄 ${result.output}`);
-        }
-      } else {
-        const retryInfo = retryCount > 0 ? ` (已重试${retryCount}次)` : '';
-        this.logger.info(`   ✗ 失败: ${result.error}${retryInfo}`);
-      }
+    for (const group of orderedGroups) {
+      // 同一阶段内并发执行
+      const groupResults = await Promise.all(
+        group.map(item => this._executeItem(item, ++executedCount, totalCount))
+      );
+      allResults.push(...groupResults);
     }
 
-    const totalTime = results.reduce((sum, r) => sum + r.executionTime, 0);
+    const totalTime = allResults.reduce((sum, r) => sum + (r.executionTime || 0), 0);
     this.logger.info(`\n   总执行时间: ${totalTime}ms`);
 
     return {
-      assignment: assignment,
-      results: results,
-      totalTime: totalTime,
-      successCount: results.filter(r => r.success).length,
-      failureCount: results.filter(r => !r.success).length
+      assignment,
+      results: allResults,
+      totalTime,
+      successCount: allResults.filter(r => r.success).length,
+      failureCount: allResults.filter(r => !r.success).length
+    };
+  }
+
+  /**
+   * 执行单个分配项（含 Layer 2 安全检查、Layer 3 监控与重试）
+   * 提取为独立方法以支持 step4 的并行调度
+   */
+  async _executeItem(item, idx, total) {
+    this.logger.info(`   [${idx}/${total}] 执行: ${item.subtask.name}`);
+
+    // ── Layer 2: 安全策略 — 文件/命令访问检查 ──────────────────
+    if (item.subtask.targetFile) {
+      const fileCheck = this.policyChecker.checkFileAccess(item.subtask.targetFile);
+      if (!fileCheck.allowed) {
+        this.logger.warn(`   [Layer2] 文件访问拒绝: ${item.subtask.targetFile}`);
+        return {
+          subtask: item.subtask.name,
+          executor: item.executor.name,
+          success: false,
+          error: `[Layer2] 文件访问被安全策略拒绝: ${fileCheck.reason}`,
+          executionTime: 0,
+          retryCount: 0,
+          retryable: false
+        };
+      }
+    }
+
+    // ── Layer 2: 合规检查 — 包安装任务拦截 ──────────────────────
+    const installPackages = item.subtask.packages || item.subtask.install;
+    if (installPackages) {
+      const specs  = Array.isArray(installPackages) ? installPackages : [installPackages];
+      const ctx    = { agentId: item.executor.agentId, taskId: this.currentTask?.id, reason: item.subtask.reason };
+      const { summary, results: compResults } = this.complianceChecker.checkAll(specs, ctx);
+
+      if (!summary.canProceed) {
+        const blocked  = compResults.filter(r => r.decision === 'rejected').map(r => `${r.packageSpec}(${r.blockReason || r.riskLevel})`);
+        const review   = compResults.filter(r => r.decision === 'pending_review').map(r => r.packageSpec);
+        const approval = compResults.filter(r => r.decision === 'pending_approval').map(r => r.packageSpec);
+
+        const details = [
+          blocked.length  ? `❌ 拒绝: ${blocked.join(', ')}`  : '',
+          review.length   ? `⚠️  需商议: ${review.join(', ')}` : '',
+          approval.length ? `🔒 需CEO批准: ${approval.join(', ')}` : ''
+        ].filter(Boolean).join(' | ');
+
+        this.logger.warn(`   [Compliance] 安装拦截: ${details}`);
+        return {
+          subtask:       item.subtask.name,
+          executor:      item.executor.name,
+          success:       false,
+          error:         `[Compliance] 包合规检查未通过: ${details}`,
+          executionTime: 0,
+          retryCount:    0,
+          retryable:     false,
+          complianceSummary: summary
+        };
+      }
+      this.logger.info(`   [Compliance] ✅ 安装合规通过: ${specs.join(', ')}`);
+    }
+    // ────────────────────────────────────────────────────────────
+
+    // ── Layer 3: 执行监控 — 启动监控上下文 ──────────────────────
+    const execCtx = this.executionMonitor.startExecution({
+      agentId: item.executor.name,
+      taskAction: item.subtask.type || 'general',
+      timeout: item.executor.config?.timeout,
+      metadata: { subtaskName: item.subtask.name }
+    });
+    // ────────────────────────────────────────────────────────────
+
+    // ── Layer 3: AutoRetry — 智能重试（指数退避）────────────────
+    let result;
+    let retryCount = 0;
+
+    try {
+      const retryWrapper = await this.autoRetry.executeWithRetry(
+        async () => {
+          const r = await this.executeTask(item);
+          if (!r.success && r.retryable) {
+            const err = new Error(r.error || '执行失败');
+            err.category = 'execution';
+            err.retryable = true;
+            throw err;
+          }
+          return r;
+        },
+        {
+          taskType: item.subtask.type,
+          maxRetries: this.currentTask?.context?.maxRetries ?? 2,
+          enableRetry: this.currentTask?.context?.enableRetry !== false,
+          onRetry: (attempt, delay) => {
+            retryCount = attempt;
+            this.logger.info(`   🔄 重试 ${attempt}: ${item.subtask.name} (等待 ${delay}ms)`);
+          }
+        }
+      );
+
+      // executeWithRetry 返回 wrapper 对象：
+      //   成功: { success: true, result: <实际任务结果> }
+      //   失败: { success: false, error: <Error对象> }
+      if (retryWrapper.success) {
+        result = retryWrapper.result;  // 解包，取真实任务结果
+      } else {
+        const rawErr = retryWrapper.error;
+        result = {
+          subtask: item.subtask.name,
+          executor: item.executor.name,
+          success: false,
+          error: rawErr instanceof Error ? rawErr.message : String(rawErr || '执行失败'),
+          retryable: false,
+          retryCount
+        };
+      }
+    } catch (err) {
+      result = {
+        subtask: item.subtask.name,
+        executor: item.executor.name,
+        success: false,
+        error: err.message,
+        retryable: false,
+        retryCount
+      };
+    }
+    // ── 问题商议 — 失败后多 Agent 共同决策恢复方案 ──────────────
+    if (!result.success && this.deliberationEngine.shouldDeliberateProblem(result, retryCount)) {
+      try {
+        const probDelib = await this.deliberationEngine.deliberateProblem(
+          item, result, this.currentTask
+        );
+        this.logger.info(DeliberationEngine.formatSummary(probDelib));
+        result.deliberation = probDelib;
+
+        const patch = probDelib.optimal.patch;
+        if (patch?.action === 'skip') {
+          // 商议决定：跳过此任务，不阻断流程
+          result.skippedByDeliberation = true;
+          result.error = `[商议决定跳过] ${result.error}`;
+        } else if (patch?.action === 'human') {
+          // 商议决定：升级人工
+          result.needsHuman = true;
+          result.error = `[商议建议人工介入] ${result.error}`;
+        }
+        // fallback: 降级执行 — 保持 result.success=false，由 rework 循环处理
+      } catch (delibErr) {
+        this.logger.warn(`[商议引擎] 问题商议失败: ${delibErr.message}，跳过商议继续`);
+      }
+    }
+    // ────────────────────────────────────────────────────────────
+
+    // ── Layer 3: 执行监控 — 结束监控 ────────────────────────────
+    try {
+      this.executionMonitor.endExecution(execCtx.id, {
+        success: result.success,
+        error: result.error
+      });
+    } catch {
+      // 监控结束失败不影响主流程
+    }
+    // ────────────────────────────────────────────────────────────
+
+    result.executionTime = Date.now() - execCtx.startTime;
+    result.retryCount    = retryCount;
+
+    if (result.success) {
+      const retryInfo = retryCount > 0 ? ` (重试${retryCount}次后成功)` : '';
+      this.logger.info(`   ✓ 完成 (${result.executionTime}ms)${retryInfo}`);
+      if (result.output) {
+        this.logger.info(`   📄 ${result.output}`);
+      }
+    } else {
+      const retryInfo = retryCount > 0 ? ` (已重试${retryCount}次)` : '';
+      this.logger.info(`   ✗ 失败: ${result.error}${retryInfo}`);
+    }
+
+    return result;
+  }
+
+  isParallelExecutionEnabled() {
+    return Boolean(this.config?.execution?.parallel?.enabled);
+  }
+
+  getParallelExecutor() {
+    if (!this._parallelExecutor) {
+      const ParallelExecutor = require('./parallel-executor');
+      const parallelConfig = this.config?.execution?.parallel || {};
+      this._parallelExecutor = new ParallelExecutor({
+        enabled: parallelConfig.enabled,
+        maxParallel: parallelConfig.maxWorkers,
+        mergeStrategy: parallelConfig.mergeStrategy,
+        worktreeDir: parallelConfig.worktreeDir
+      });
+    }
+
+    return this._parallelExecutor;
+  }
+
+  async step4_execute_parallel(assignment) {
+    this.logger.info('\n📍 Step 4: 指挥 - 并行执行模式');
+
+    const parallelExecutor = this.getParallelExecutor();
+    const parallelGroups = assignment?.executionPlan?.parallel || [];
+
+    try {
+      const execution = await parallelExecutor.executeParallel(
+        assignment.assignments || [],
+        (item, execContext) => this.executeTask(item, execContext),
+        {
+          workingDir: process.cwd(),
+          parallelGroups,
+          fallback: async (reason) => {
+            this.logger.info(`   ↩️  回退串行执行: ${reason}`);
+            return this.step4_execute(assignment);
+          }
+        }
+      );
+
+      if (execution.fallback) {
+        return execution;
+      }
+
+      return {
+        assignment,
+        results: execution.results.map((result) => this.normalizeParallelResult(result)),
+        totalTime: execution.results.reduce(
+          (sum, result) => sum + (result.output?.executionTime || 0),
+          0
+        ),
+        successCount: execution.results.filter((result) => result.success).length,
+        failureCount: execution.results.filter((result) => !result.success).length,
+        parallel: {
+          enabled: true,
+          mergeResult: execution.mergeResult,
+          worktrees: execution.worktrees
+        }
+      };
+    } catch (error) {
+      this.logger.warn(`   并行执行失败，回退串行: ${error.message}`);
+      return this.step4_execute(assignment);
+    }
+  }
+
+  normalizeParallelResult(result) {
+    if (result.output && typeof result.output === 'object') {
+      return {
+        ...result.output,
+        branch: result.branch,
+        worktreePath: result.worktreePath
+      };
+    }
+
+    return {
+      subtaskId: result.taskId,
+      success: result.success,
+      error: result.error,
+      branch: result.branch,
+      worktreePath: result.worktreePath
     };
   }
 
   /**
    * 执行单个任务
    */
-  async executeTask(item) {
+  async executeTask(item, extraContext = {}) {
     const subtask = item.subtask;
     const executor = item.executor;
 
     try {
-      // 根据执行器名称映射到 Agent ID
-      const agentIdMap = {
+      // 优先使用 executor.agentId（P2 直接携带），回退兼容旧的 name 映射
+      const agentId = executor.agentId || {
         'Explore Agent': 'explore',
         'Plan Agent': 'plan',
         'General-Purpose Agent': 'general',
-        'Inspector Agent': 'inspector'
-      };
-
-      const agentId = agentIdMap[executor.name];
+        'Inspector Agent': 'inspector',
+        'Research Agent': 'research'
+      }[executor.name];
 
       if (!agentId) {
         // 如果没有匹配的真实 Agent，使用模拟执行
@@ -353,9 +1026,19 @@ class SupervisorAgent {
 
       // 构建任务对象（根据子任务类型）
       const task = this.buildAgentTask(subtask, agentId);
+      task.name = subtask.name;
+      task.description = subtask.description || subtask.name;
+
+      // 注入技能上下文
+      if (this.skillLoader && agentId) {
+        await this.taskDispatcher.enrichTaskWithSkills(task, agentId, this.skillLoader);
+      }
 
       // 使用 AgentExecutor 执行真实任务
-      const result = await this.agentExecutor.execute(agentId, task, this.currentTask.context);
+      const result = await this.agentExecutor.execute(agentId, task, {
+        ...(this.currentTask?.context || {}),
+        ...extraContext
+      });
 
       return {
         subtask: subtask.name,
@@ -385,30 +1068,122 @@ class SupervisorAgent {
 
   /**
    * 构建 Agent 任务对象
+   * 根据 subtask 的实际内容生成语义正确的任务单，不再使用硬编码占位符
    */
   buildAgentTask(subtask, agentId) {
-    // 根据子任务类型和 Agent 类型构建任务
-    const taskMap = {
-      'explore': {
-        action: 'file_search',
-        pattern: '**/*.js'
-      },
-      'plan': {
-        action: 'analyze_requirement',
-        requirement: subtask.name
-      },
-      'general': {
-        action: 'run_command',
-        command: 'echo "Task: ' + subtask.name + '"'
-      },
-      'inspector': {
-        action: 'inspect',
-        execution: { results: [] },
-        analysis: { taskType: 'test' }
-      }
-    };
+    const desc = subtask.description || subtask.name || '';
+    const type = subtask.type || '';
 
-    return taskMap[agentId] || { action: 'default' };
+    switch (agentId) {
+      case 'explore':
+        // 优先用 code_search（基于描述），如果 subtask 指定了具体文件则 read_file
+        if (subtask.targetFile) {
+          return {
+            action: 'read_file',
+            filePath: subtask.targetFile
+          };
+        }
+        return {
+          action: 'code_search',
+          query: desc,
+          pattern: subtask.searchPattern || '**/*.js',
+          cwd: subtask.targetDir || process.cwd()
+        };
+
+      case 'plan':
+        if (type === 'analyze') {
+          return {
+            action: 'analyze_requirement',
+            requirement: desc
+          };
+        }
+        // plan / design — planDesignSolution 强制要求 analysis 字段
+        return {
+          action: 'design_solution',
+          requirement: desc,
+          analysis: subtask.analysis || {
+            taskType: subtask.type || 'general',
+            goal: { description: desc },
+            acceptanceCriteria: [],
+            constraints: [],
+            risks: [],
+            priority: 'medium',
+            complexity: 2
+          },
+          context: subtask.context || {}
+        };
+
+      case 'general':
+        if (type === 'write') {
+          return {
+            action: 'create_file',
+            filePath: subtask.targetFile || 'output.md',
+            content: subtask.content || `# ${subtask.name}\n\n${desc}`
+          };
+        }
+        if (type === 'code' && subtask.targetFile && subtask.oldString !== undefined) {
+          return {
+            action: 'edit_file',
+            filePath: subtask.targetFile,
+            oldString: subtask.oldString,
+            newString: subtask.newString || ''
+          };
+        }
+        // code / execute / default → run_command
+        return {
+          action: 'run_command',
+          command: subtask.command || `echo "Executing: ${subtask.name}"`,
+          cwd: subtask.targetDir || process.cwd()
+        };
+
+      case 'inspector':
+        return {
+          action: 'inspect',
+          execution: subtask.executionRef || { results: [] },
+          analysis: subtask.analysisRef || {
+            taskType: type || 'test',
+            risks: [],
+            goal: { description: desc },
+            complexity: { score: 1 }
+          },
+          scope: desc
+        };
+
+      case 'research':
+        // 根据子任务描述判断具体操作
+        if (subtask.url) {
+          return {
+            action: 'fetch_url',
+            url: subtask.url,
+            extractText: subtask.extractText !== false
+          };
+        }
+        if (subtask.technology && subtask.topic) {
+          return {
+            action: 'doc_lookup',
+            technology: subtask.technology,
+            topic: subtask.topic,
+            version: subtask.version
+          };
+        }
+        if (subtask.api) {
+          return {
+            action: 'api_reference',
+            api: subtask.api,
+            endpoint: subtask.endpoint,
+            method: subtask.method
+          };
+        }
+        // 默认使用 web_search
+        return {
+          action: 'web_search',
+          query: desc,
+          engine: subtask.engine || 'duckduckgo'
+        };
+
+      default:
+        return { action: 'default', description: desc };
+    }
   }
 
   /**
@@ -439,6 +1214,24 @@ class SupervisorAgent {
         return `执行命令: ${result.result.command}`;
       case 'inspect':
         return `检查完成: ${result.result.passed ? '通过' : '未通过'}`;
+      case 'web_search':
+        return `网络搜索: 找到 ${result.result.count} 个结果`;
+      case 'fetch_url':
+        return `抓取URL: ${result.result.url} (${result.result.contentLength} 字节)`;
+      case 'doc_lookup':
+        return `文档查询: ${result.result.technology} - ${result.result.topic}`;
+      case 'api_reference':
+        return `API参考: ${result.result.api} ${result.result.endpoint || ''}`;
+      case 'browser_visit':
+        return result.result?.needLogin
+          ? `浏览器访问: ${result.result.url}, 请手动登录`
+          : `浏览器访问: ${result.result?.url || ''}`;
+      case 'browser_confirm':
+        return `人工操作确认: ${result.result?.url || ''}`;
+      case 'browser_action':
+        return `浏览器操作: ${result.message || '完成'}`;
+      case 'browser_status':
+        return `浏览器状态: ${result.status?.state || 'unknown'}`;
       default:
         return '执行完成';
     }
@@ -526,7 +1319,7 @@ class SupervisorAgent {
 
     // 综合判断
     const criticalFailures = failedTasks.filter(t =>
-      t.subtask.includes('关键') || t.subtask.includes('核心')
+      (t.subtask || '').includes('关键') || (t.subtask || '').includes('核心')
     );
 
     // 检查安全扫描是否失败（安全问题必须通过）
@@ -559,6 +1352,26 @@ class SupervisorAgent {
         this.logger.info(`   3. 修复 Inspector 发现的问题`);
       }
     }
+
+    // ── 通信路由：各总监 → CEO 上报结果（1+5 架构合规验证）────────
+    const reportingAgents = new Set(results.map(r => {
+      const name = r.executor || '';
+      const nameMap = {
+        'Explore Agent': 'explore', 'Plan Agent': 'plan',
+        'General-Purpose Agent': 'general', 'Inspector Agent': 'inspector',
+        'Research Agent': 'research'
+      };
+      return nameMap[name] || null;
+    }).filter(Boolean));
+
+    reportingAgents.forEach(agentId => {
+      try {
+        this.commRouter.send(agentId, 'supervisor', { type: 'result_report' });
+      } catch {
+        // strict=false 时不会抛出
+      }
+    });
+    // ────────────────────────────────────────────────────────────
 
     return {
       passed: passed,
@@ -644,11 +1457,11 @@ class SupervisorAgent {
   async checkQuality(execution, analysis) {
     // 检查执行质量
     const hasTestTask = execution.results.some(r =>
-      r.subtask.includes('测试') || r.subtask.includes('验证')
+      (r.subtask || '').includes('测试') || (r.subtask || '').includes('验证')
     );
 
     const testTaskSuccess = execution.results
-      .filter(r => r.subtask.includes('测试') || r.subtask.includes('验证'))
+      .filter(r => (r.subtask || '').includes('测试') || (r.subtask || '').includes('验证'))
       .every(r => r.success);
 
     const passed = !hasTestTask || testTaskSuccess;
@@ -1397,7 +2210,11 @@ class SupervisorAgent {
       'code': ['code_writing', 'file_editing'],
       'test': ['testing', 'code_review'],
       'write': ['code_writing', 'file_editing'],
-      'review': ['code_review', 'quality_check']
+      'review': ['code_review', 'quality_check'],
+      'research': ['web_search', 'doc_lookup', 'api_reference'],
+      'web_search': ['web_search', 'knowledge_retrieval'],
+      'doc_lookup': ['doc_lookup', 'knowledge_retrieval'],
+      'api_reference': ['api_reference', 'knowledge_retrieval']
     };
 
     const requiredCaps = typeCapMap[subtask.type] || [];
@@ -1572,12 +2389,13 @@ class SupervisorAgent {
     // 模拟执行延迟
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 99% 成功率（根据优先级调整）
-    let successRate = 0.99;
+    // 提升基线成功率，减少噪声对学习系统的污染
+    // 原值 0.99/0.995/0.98 在多步骤串行中累计失败率过高
+    let successRate = 0.998;
     if (item.subtask.priority === 'critical') {
-      successRate = 0.995;
+      successRate = 0.999;
     } else if (item.subtask.priority === 'low') {
-      successRate = 0.98;
+      successRate = 0.995;
     }
 
     const success = Math.random() < successRate;
@@ -1644,6 +2462,175 @@ class SupervisorAgent {
       result: result,
       timestamp: Date.now()
     });
+  }
+
+  // ========== P1: 自动进化集成 ==========
+
+  /**
+   * 记录执行结果到进化引擎，触发 Sense → Learn → Verify → Push 循环
+   * @param {Object} analysis - 任务分析结果
+   * @param {Object} inspection - 检查结果
+   * @param {number} duration - 执行时长 (ms)
+   * @param {number} reworkCount - 重做次数
+   */
+  async _recordEvolution(analysis, inspection, duration, reworkCount) {
+    if (!this.evolutionEngine || !analysis) return;
+
+    try {
+      // 1. Record: 记录执行事件
+      this.evolutionEngine.record({
+        taskType: analysis.taskType || 'general',
+        success: inspection.passed,
+        executionTime: duration,
+        reworkCount: reworkCount,
+        complexity: analysis.complexity?.level || 'medium',
+        risks: analysis.risks?.length || 0
+      });
+
+      // 2. Evolve: 触发完整进化循环 (Sense → Learn → Verify → Push)
+      const evolutionResult = await this.evolutionEngine.evolve({
+        taskType: analysis.taskType || 'general',
+        success: inspection.passed,
+        executionTime: duration,
+        error: inspection.passed ? null : (inspection.error || 'Unknown error'),
+        strategy: analysis.taskType || 'general'
+      });
+
+      if (evolutionResult && evolutionResult.strategiesLearned > 0) {
+        this.logger.info(`🧬 进化引擎学习了 ${evolutionResult.strategiesLearned} 条新策略`);
+      }
+
+      // 3. 记录到知识库
+      if (this.knowledgeBase) {
+        this.knowledgeBase.recordExecution(
+          analysis.taskType || 'general',
+          'supervisor',
+          inspection.passed,
+          duration
+        );
+      }
+
+    } catch (error) {
+      this.logger.warn(`进化引擎记录失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 获取进化引擎统计
+   */
+  getEvolutionStats() {
+    if (!this.evolutionEngine) return null;
+    return this.evolutionEngine.getStats();
+  }
+
+  /**
+   * 获取活跃的进化策略
+   */
+  getActiveEvolutionStrategies() {
+    if (!this.evolutionEngine) return [];
+    return this.evolutionEngine.getActiveStrategies();
+  }
+
+  // ========== P1: 项目接入自动化 ==========
+
+  /**
+   * 执行项目接入流程
+   * @param {Object} options - 接入选项
+   * @returns {Promise<Object>} - 接入结果
+   */
+  async onboardProject(options = {}) {
+    if (!this.projectOnboarding) {
+      this.projectOnboarding = new ProjectOnboarding({
+        projectRoot: this.storage.projectRoot,
+        logger: this.logger.child({ component: 'onboarding' })
+      });
+    }
+    return this.projectOnboarding.onboard(options);
+  }
+
+  /**
+   * 获取项目检测结果
+   */
+  getProjectDetection() {
+    if (!this.projectOnboarding) return null;
+    return this.projectOnboarding.detection;
+  }
+
+  /**
+   * 检查项目是否已接入
+   */
+  isProjectOnboarded() {
+    const configPath = this.storage.resolveConfigPath();
+    return configPath !== null;
+  }
+
+  // ========== P1: 文档生成 ==========
+
+  /**
+   * 生成项目文档
+   * @param {Object} options - 生成选项
+   * @returns {Promise<Object>} - 生成结果
+   */
+  async generateDocs(options = {}) {
+    if (!this.docGenerator) {
+      this.docGenerator = new DocGenerator({
+        srcDir: path.join(this.storage.projectRoot, 'src'),
+        outputDir: options.outputDir || path.join(this.storage.projectRoot, 'docs'),
+        logger: this.logger.child({ component: 'doc-generator' })
+      });
+    }
+    return this.docGenerator.generate(options);
+  }
+
+  /**
+   * 同步文档（增量更新）
+   */
+  async syncDocs(options = {}) {
+    return this.generateDocs({ ...options, incremental: true });
+  }
+
+  // ========== Phase G: 流水线执行器 (G2) ==========
+
+  /**
+   * 路由方法：根据 executionMode 选择执行策略
+   * closed_loop（默认）→ handleTask
+   * pipeline → handleTask_pipeline
+   */
+  async handleTask_v2(taskMessage, context = {}) {
+    const mode = (this.config?.execution?.mode) || 'closed_loop';
+    if (mode === 'pipeline') {
+      return this.handleTask_pipeline(taskMessage, context);
+    }
+    return this.handleTask(taskMessage, context);
+  }
+
+  /**
+   * 流水线模式执行任务
+   */
+  async handleTask_pipeline(taskMessage, context = {}) {
+    this.logger.info('\n🎯 Supervisor Agent 启动 (Pipeline 模式)');
+    this.logger.info(`📝 任务: ${taskMessage}\n`);
+
+    const { PipelineExecutor } = require('./pipeline-executor');
+
+    const pipeline = new PipelineExecutor({
+      agentExecutor: this.agentExecutor,
+      knowledgeBase: this.knowledgeBase,
+      stopOnGateFailure: (this.config?.execution?.pipeline?.stopOnGateFailure) !== false
+    });
+
+    const result = await pipeline.execute({
+      task: taskMessage,
+      ...context
+    });
+
+    return {
+      success: result.passed,
+      mode: 'pipeline',
+      stages: result.stages,
+      failedAt: result.failedAt,
+      totalTime: result.totalTime
+    };
   }
 }
 

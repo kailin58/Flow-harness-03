@@ -59,7 +59,7 @@ class AgentsParser {
   parse(filePath = null) {
     const targetPath = filePath || this.agentsMdPath || this._findAgentsMd();
 
-    if (!targetPath || !fs.existsSync(targetPath)) {
+    if (!targetPath || typeof targetPath !== 'string' || !fs.existsSync(targetPath)) {
       console.warn('[AgentsParser] AGENTS.md 未找到，使用内置默认规则');
       this._loadDefaults();
       this.parsed = true;

@@ -1,4 +1,5 @@
 const AgentRegistry = require('../src/agent-registry');
+const { CORE_AGENTS, TASK_TYPE_MAP, CEO_FORBIDDEN, CEO_ID, DIRECTOR_IDS } = require('../src/agent-registry');
 
 function testAgentRegistry() {
   console.log('🧪 测试 AgentRegistry...\n');
@@ -99,13 +100,14 @@ function testAgentRegistry() {
     console.log('\nTest 9: 初始化核心 Agent');
     const coreRegistry = new AgentRegistry();
     const coreCount = coreRegistry.initializeCoreAgents();
-    assert(coreCount === 5, '5 个核心 Agent');
+    assert(coreCount === 6, '6 个核心 Agent（1 CEO + 5 总监）');
     assert(coreRegistry.initialized === true, '标记已初始化');
     assert(coreRegistry.has('supervisor'), '有 supervisor');
     assert(coreRegistry.has('explore'), '有 explore');
     assert(coreRegistry.has('plan'), '有 plan');
     assert(coreRegistry.has('general'), '有 general');
     assert(coreRegistry.has('inspector'), '有 inspector');
+    assert(coreRegistry.has('research'), '有 research');
 
     // ---- Test 10: 核心 Agent 角色 ----
     console.log('\nTest 10: 核心 Agent 角色');
@@ -119,6 +121,8 @@ function testAgentRegistry() {
     assert(gen.role === '总监3', 'general 是 总监3');
     const ins = coreRegistry.get('inspector');
     assert(ins.role === '总监4', 'inspector 是 总监4');
+    const res = coreRegistry.get('research');
+    assert(res.role === '总监5', 'research 是 总监5');
 
     // ---- Test 11: 核心 Agent 能力 ----
     console.log('\nTest 11: 核心 Agent 能力');
@@ -128,6 +132,7 @@ function testAgentRegistry() {
     assert(pln.capabilities.includes('architecture_design'), 'plan 有 architecture_design');
     assert(gen.capabilities.includes('code_writing'), 'general 有 code_writing');
     assert(ins.capabilities.includes('code_review'), 'inspector 有 code_review');
+    assert(res.capabilities.includes('web_search'), 'research 有 web_search');
 
     // ---- Test 12: matchBestAgent (类型匹配) ----
     console.log('\nTest 12: matchBestAgent (类型匹配)');
@@ -145,6 +150,8 @@ function testAgentRegistry() {
 
     const reviewMatch = coreRegistry.matchBestAgent({ type: 'review' });
     assert(reviewMatch.name === 'Inspector Agent', 'review → Inspector Agent');
+    const researchMatch = coreRegistry.matchBestAgent({ type: 'research' });
+    assert(researchMatch.name === 'Research Agent', 'research → Research Agent');
 
     // ---- Test 13: matchBestAgent (能力匹配) ----
     console.log('\nTest 13: matchBestAgent (能力匹配)');
@@ -235,6 +242,150 @@ function testAgentRegistry() {
     });
     const sharedResult = multiReg.findByCapability('cap_a');
     assert(sharedResult.length === 2, '2 个 Agent 共享 cap_a');
+
+    // ========================================================
+    // ---- Test 22: CORE_AGENTS 冻结常量 ----
+    // ========================================================
+    console.log('\nTest 22: CORE_AGENTS 冻结常量');
+
+    // 导出
+    assert(Array.isArray(CORE_AGENTS), 'CORE_AGENTS 是数组');
+    assert(Array.isArray(AgentRegistry.CORE_AGENTS), 'AgentRegistry.CORE_AGENTS 静态属性存在');
+    assert(CORE_AGENTS === AgentRegistry.CORE_AGENTS, 'CORE_AGENTS 与静态属性同一对象');
+
+    // 冻结验证
+    assert(Object.isFrozen(CORE_AGENTS), 'CORE_AGENTS 顶层冻结');
+    assert(CORE_AGENTS.every(a => Object.isFrozen(a)), '每个 Agent 条目冻结');
+    assert(CORE_AGENTS.every(a => Object.isFrozen(a.capabilities)), '每个 capabilities 冻结');
+    assert(CORE_AGENTS.every(a => Object.isFrozen(a.responsibilities)), '每个 responsibilities 冻结');
+
+    // 数量约束
+    assert(CORE_AGENTS.length === 6, 'CORE_AGENTS 恰好 6 个');
+    assert(CORE_AGENTS.filter(a => a.level === 0).length === 1, '恰好 1 个 CEO');
+    assert(CORE_AGENTS.filter(a => a.level === 1).length === 5, '恰好 5 个总监');
+
+    // 不可新增
+    let caTampered = false;
+    try { CORE_AGENTS.push({ id: 'hack' }); caTampered = true; } catch { caTampered = false; }
+    assert(!caTampered, 'CORE_AGENTS 不可新增条目');
+
+    // 不可修改条目属性（非严格模式不抛异常，直接验证值未变）
+    const origCeoId = CORE_AGENTS[0].id;
+    try { CORE_AGENTS[0].id = 'hacked'; } catch { /* strict mode */ }
+    assert(CORE_AGENTS[0].id === origCeoId, 'CEO id 不可篡改');
+
+    // CEO 禁止行为字段
+    const ceo = CORE_AGENTS.find(a => a.id === 'supervisor');
+    assert(Array.isArray(ceo.forbidden), 'CEO 有 forbidden 字段');
+    assert(ceo.forbidden.includes('write_code'), 'CEO forbidden 含 write_code');
+    assert(ceo.forbidden.includes('edit_file'),  'CEO forbidden 含 edit_file');
+
+    // kbNamespace 字段
+    assert(CORE_AGENTS.find(a => a.id === 'explore').kbNamespace === 'codebase', 'explore kbNamespace=codebase');
+    assert(CORE_AGENTS.find(a => a.id === 'plan').kbNamespace === 'plans',       'plan kbNamespace=plans');
+    assert(CORE_AGENTS.find(a => a.id === 'general').kbNamespace === 'changes',  'general kbNamespace=changes');
+    assert(CORE_AGENTS.find(a => a.id === 'inspector').kbNamespace === 'quality','inspector kbNamespace=quality');
+    assert(CORE_AGENTS.find(a => a.id === 'research').kbNamespace === 'external','research kbNamespace=external');
+
+    // ---- Test 23: TASK_TYPE_MAP 冻结常量 ----
+    console.log('\nTest 23: TASK_TYPE_MAP 冻结常量');
+
+    assert(typeof TASK_TYPE_MAP === 'object', 'TASK_TYPE_MAP 是对象');
+    assert(Object.isFrozen(TASK_TYPE_MAP), 'TASK_TYPE_MAP 冻结');
+    assert(TASK_TYPE_MAP === AgentRegistry.TASK_TYPE_MAP, 'TASK_TYPE_MAP 与静态属性同一对象');
+
+    // 不可新增（非严格模式不抛，验证值未添加）
+    try { TASK_TYPE_MAP['hack'] = 'general'; } catch { /* strict */ }
+    assert(TASK_TYPE_MAP['hack'] === undefined, 'TASK_TYPE_MAP 不可新增');
+
+    // 路由正确性
+    assert(TASK_TYPE_MAP['explore']       === 'explore',   'explore → explore');
+    assert(TASK_TYPE_MAP['analyze']       === 'plan',      'analyze → plan');
+    assert(TASK_TYPE_MAP['plan']          === 'plan',      'plan → plan');
+    assert(TASK_TYPE_MAP['code']          === 'general',   'code → general');
+    assert(TASK_TYPE_MAP['write']         === 'general',   'write → general');
+    assert(TASK_TYPE_MAP['execute']       === 'general',   'execute → general');
+    assert(TASK_TYPE_MAP['test']          === 'inspector', 'test → inspector');
+    assert(TASK_TYPE_MAP['review']        === 'inspector', 'review → inspector');
+    assert(TASK_TYPE_MAP['inspect']       === 'inspector', 'inspect → inspector');
+    assert(TASK_TYPE_MAP['research']      === 'research',  'research → research');
+    assert(TASK_TYPE_MAP['web_search']    === 'research',  'web_search → research');
+    assert(TASK_TYPE_MAP['doc_lookup']    === 'research',  'doc_lookup → research');
+    assert(TASK_TYPE_MAP['api_reference'] === 'research',  'api_reference → research');
+    assert(TASK_TYPE_MAP['fetch_url']     === 'research',  'fetch_url → research');
+
+    // ---- Test 24: CEO_FORBIDDEN 冻结常量 ----
+    console.log('\nTest 24: CEO_FORBIDDEN 冻结常量');
+
+    assert(Array.isArray(CEO_FORBIDDEN), 'CEO_FORBIDDEN 是数组');
+    assert(Object.isFrozen(CEO_FORBIDDEN), 'CEO_FORBIDDEN 冻结');
+    assert(CEO_FORBIDDEN === AgentRegistry.CEO_FORBIDDEN, 'CEO_FORBIDDEN 与静态属性同一对象');
+    assert(CEO_FORBIDDEN.includes('write_code'),  'write_code 在禁止列表');
+    assert(CEO_FORBIDDEN.includes('edit_file'),   'edit_file 在禁止列表');
+    assert(CEO_FORBIDDEN.includes('run_command'), 'run_command 在禁止列表');
+    assert(CEO_FORBIDDEN.includes('execute_task'),'execute_task 在禁止列表');
+
+    // 不可修改
+    let fbTampered = false;
+    try { CEO_FORBIDDEN.push('allow_all'); fbTampered = true; } catch { fbTampered = false; }
+    assert(!fbTampered, 'CEO_FORBIDDEN 不可新增');
+
+    // ---- Test 25: CEO_ID / DIRECTOR_IDS 冻结常量 ----
+    console.log('\nTest 25: CEO_ID / DIRECTOR_IDS');
+
+    assert(CEO_ID === 'supervisor', 'CEO_ID = supervisor');
+    assert(AgentRegistry.CEO_ID === 'supervisor', 'AgentRegistry.CEO_ID 静态属性正确');
+    assert(DIRECTOR_IDS instanceof Set, 'DIRECTOR_IDS 是 Set');
+    assert(DIRECTOR_IDS.size === 5, 'DIRECTOR_IDS 恰好 5 个');
+    assert(DIRECTOR_IDS.has('explore'),   'DIRECTOR_IDS 含 explore');
+    assert(DIRECTOR_IDS.has('plan'),      'DIRECTOR_IDS 含 plan');
+    assert(DIRECTOR_IDS.has('general'),   'DIRECTOR_IDS 含 general');
+    assert(DIRECTOR_IDS.has('inspector'), 'DIRECTOR_IDS 含 inspector');
+    assert(DIRECTOR_IDS.has('research'),  'DIRECTOR_IDS 含 research');
+
+    // DIRECTOR_IDS 正确性（Object.freeze 不拦截 Set.add，由 selfCheck 在模块加载时保障数量）
+    assert(AgentRegistry.DIRECTOR_IDS === DIRECTOR_IDS, 'DIRECTOR_IDS 与静态属性同一对象');
+    assert(Object.isFrozen(DIRECTOR_IDS), 'DIRECTOR_IDS 对象本身冻结');
+    // Set.add 在 Object.freeze 下仍可调用——完整性由 selfCheck 在加载期校验，无需运行时防护
+
+    // ---- Test 26: 核心 Agent 保护（不可外部覆盖）----
+    console.log('\nTest 26: 核心 Agent 保护');
+
+    const protReg = new AgentRegistry();
+    protReg.initializeCoreAgents();
+
+    let protThrew = false;
+    try { protReg.register('supervisor', { name: 'x', role: 'y' }); }
+    catch (e) { protThrew = true; assert(e.message.includes('写死'), '错误信息提示写死'); }
+    assert(protThrew, 'supervisor 受保护不可覆盖');
+
+    protThrew = false;
+    try { protReg.register('explore', { name: 'x', role: 'y' }); }
+    catch { protThrew = true; }
+    assert(protThrew, 'explore 受保护不可覆盖');
+
+    // CEO 不可直接拥有子Agent（跳级禁止）
+    protThrew = false;
+    try { protReg.registerSubAgent('supervisor', { name: 'x', capability: 'y' }); }
+    catch (e) { protThrew = true; assert(e.message.includes('level=1'), 'CEO子Agent错误提示level'); }
+    assert(protThrew, 'CEO 不可直接拥有子Agent');
+
+    // ---- Test 27: CORE_AGENTS 驱动 initializeCoreAgents ----
+    console.log('\nTest 27: CORE_AGENTS 驱动初始化');
+
+    const driveReg = new AgentRegistry();
+    driveReg.initializeCoreAgents();
+
+    // 验证每个 CORE_AGENTS 条目都被正确加载
+    for (const def of CORE_AGENTS) {
+      const loaded = driveReg.get(def.id);
+      assert(loaded !== undefined, `${def.id} 已加载`);
+      assert(loaded.name === def.name, `${def.id}.name 正确`);
+      assert(loaded.role === def.role, `${def.id}.role 正确`);
+      assert(loaded.level === def.level, `${def.id}.level 正确`);
+      assert(loaded.parentId === def.parentId, `${def.id}.parentId 正确`);
+      assert(loaded.kbNamespace === def.kbNamespace, `${def.id}.kbNamespace 正确`);
+    }
 
   } catch (error) {
     console.log(`\n❌ 测试异常: ${error.message}`);

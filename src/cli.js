@@ -28,57 +28,98 @@ Documentation:
 // 初始化命令
 program
   .command('init')
-  .description('Initialize Flow Harness in current directory (5-step onboarding)')
+  .description('Initialize Flow Harness global storage (zero-footprint mode)')
   .option('--force', 'Force reinitialize even if already configured')
+  .option('-p, --project-root <path>', 'Business project root directory (default: cwd)')
   .action(async (options) => {
     try {
-      const { ProjectOnboarding } = require('./project-onboarding');
-      const onboarding = new ProjectOnboarding({ projectRoot: process.cwd() });
+      const { StorageManager } = require('./storage-manager');
+      const fs = require('fs');
+      const path = require('path');
 
-      console.log(chalk.blue('🚀 Flow Harness 项目接入 (5步自动化)\n'));
+      const storage = new StorageManager({ projectRoot: options.projectRoot });
 
-      // Step 1: 检测
-      console.log(chalk.cyan('Step 1/5: 检测项目...'));
-      const detection = await onboarding.step1_detect();
-      console.log(`  技术栈: ${detection.techStacks.map(s => s.name).join(', ') || '未检测到'}`);
-      console.log(`  项目类型: ${detection.projectType}`);
-      console.log(`  版本控制: ${detection.vcs || '无'}`);
+      console.log(chalk.blue('🚀 Flow Harness 初始化 (零足迹模式)\n'));
+      console.log(chalk.gray(`   业务项目: ${storage.projectRoot}`));
+      console.log(chalk.gray(`   框架数据: ${storage.globalRoot}\n`));
 
-      if (detection.existingConfig && !options.force) {
-        console.log(chalk.yellow('\n⚠️  已检测到 .flowharness/ 配置，使用 --force 覆盖'));
-        process.exit(0);
-      }
+      // Step 1: 创建全局目录结构（不在业务项目内）
+      console.log(chalk.cyan('Step 1: 创建全局存储目录...'));
+      storage.ensureDirs();
+      console.log(chalk.green(`  ✓ ${storage.globalRoot}`));
+      console.log(chalk.green(`  ✓ ${storage.projectDataDir}`));
 
-      // Step 2: 配置
-      console.log(chalk.cyan('\nStep 2/5: 生成配置...'));
-      const config = await onboarding.step2_configure(detection);
-      console.log(`  配置文件: ${config.configPath}`);
-
-      // Step 3: 安全
-      console.log(chalk.cyan('\nStep 3/5: 安全策略...'));
-      const security = await onboarding.step3_secure(detection);
-      console.log(`  默认角色: ${security.securityConfig.defaultRole}`);
-      console.log(`  关键路径: ${security.securityConfig.criticalPaths.length} 条规则`);
-
-      // Step 4: 验证
-      console.log(chalk.cyan('\nStep 4/5: 验证配置...'));
-      const validation = await onboarding.step4_validate();
-      validation.checks.forEach(c => {
-        const icon = c.passed ? chalk.green('✓') : chalk.red('✗');
-        console.log(`  ${icon} ${c.detail}`);
-      });
-
-      // Step 5: 启动
-      console.log(chalk.cyan('\nStep 5/5: 激活...'));
-      const activation = await onboarding.step5_activate();
-
-      if (validation.allPassed) {
-        console.log(chalk.green('\n✨ Flow Harness 初始化完成！'));
-        console.log(chalk.gray(`   配置目录: ${activation.harnessDir}`));
-        console.log(chalk.gray('   运行 flowharness supervisor "你的任务" 开始使用'));
+      // Step 2: 初始化全局配置
+      console.log(chalk.cyan('\nStep 2: 配置文件...'));
+      if (!fs.existsSync(storage.globalConfigPath) || options.force) {
+        storage._bootstrapGlobalConfig();
+        console.log(chalk.green(`  ✓ 全局配置已创建: ${storage.globalConfigPath}`));
       } else {
-        console.log(chalk.yellow(`\n⚠️  初始化完成但有 ${validation.total - validation.passed} 项检查未通过`));
+        console.log(chalk.gray(`  - 已存在: ${storage.globalConfigPath}`));
       }
+
+      // Step 3: 迁移旧版项目内配置（如有）
+      console.log(chalk.cyan('\nStep 3: 检查旧版配置迁移...'));
+      const legacyDir = path.join(storage.projectRoot, '.flowharness');
+      if (fs.existsSync(legacyDir)) {
+        console.log(chalk.yellow(`  ⚠️  检测到旧版 .flowharness/ 目录: ${legacyDir}`));
+
+        // 迁移 knowledge 数据
+        const legacyKnowledge = path.join(legacyDir, 'knowledge');
+        if (fs.existsSync(legacyKnowledge)) {
+          const files = fs.readdirSync(legacyKnowledge);
+          for (const f of files) {
+            const src = path.join(legacyKnowledge, f);
+            const dst = path.join(storage.knowledgeDir, f);
+            if (!fs.existsSync(dst) || options.force) {
+              fs.copyFileSync(src, dst);
+              console.log(chalk.green(`  ✓ 迁移: ${f} → ${storage.knowledgeDir}`));
+            }
+          }
+        }
+
+        // 迁移 skills
+        const legacySkills = path.join(legacyDir, 'skills');
+        if (fs.existsSync(legacySkills)) {
+          const skillFiles = fs.readdirSync(legacySkills);
+          for (const f of skillFiles) {
+            const src = path.join(legacySkills, f);
+            const dst = path.join(storage.globalSkillsDir, f);
+            if (!fs.existsSync(dst) || options.force) {
+              fs.copyFileSync(src, dst);
+              console.log(chalk.green(`  ✓ 迁移技能: ${f} → ${storage.globalSkillsDir}`));
+            }
+          }
+        }
+
+        console.log(chalk.yellow(`\n  提示: 迁移完成后可手动删除 ${legacyDir}`));
+        console.log(chalk.yellow(`        建议将 .flowharness/ 添加到 .gitignore`));
+
+        // Step 4: 自动添加 .gitignore 条目
+        const gitignorePath = path.join(storage.projectRoot, '.gitignore');
+        if (fs.existsSync(gitignorePath)) {
+          const content = fs.readFileSync(gitignorePath, 'utf8');
+          if (!content.includes('.flowharness/')) {
+            fs.appendFileSync(gitignorePath, '\n# Flow Harness 框架数据（已迁移至 ~/.flowharness/）\n.flowharness/\n');
+            console.log(chalk.green(`  ✓ 已将 .flowharness/ 添加到 .gitignore`));
+          } else {
+            console.log(chalk.gray(`  - .flowharness/ 已在 .gitignore 中`));
+          }
+        }
+      } else {
+        console.log(chalk.green('  ✓ 无旧版数据，业务项目保持零足迹'));
+      }
+
+      // 完成
+      console.log(chalk.green('\n✨ 初始化完成！'));
+      console.log(chalk.bold('\n存储布局:'));
+      console.log(chalk.gray(`  全局配置:   ${storage.globalConfigPath}`));
+      console.log(chalk.gray(`  知识库:     ${storage.knowledgeDir}`));
+      console.log(chalk.gray(`  技能库:     ${storage.globalSkillsDir}`));
+      console.log(chalk.gray(`  项目数据:   ${storage.projectDataDir}`));
+      console.log(chalk.bold('\n下一步:'));
+      console.log(chalk.cyan(`  flowharness supervisor "你的任务"`));
+      console.log(chalk.cyan(`  flowharness supervisor "你的任务" --project-root /path/to/project\n`));
     } catch (error) {
       console.error(chalk.red(`\n💥 初始化失败: ${error.message}`));
       process.exit(1);
@@ -214,15 +255,14 @@ program
 
       if (result.allowed) {
         console.log(chalk.green(`✅ File access allowed: ${filePath}`));
-        process.exit(0);
       } else {
         console.log(chalk.red(`❌ File access denied: ${filePath}`));
         console.log(chalk.gray(`   Reason: ${result.reason}`));
-        process.exit(1);
+        process.exitCode = 1;
       }
     } catch (error) {
       console.error(chalk.red(`\n💥 Error: ${error.message}`));
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 
@@ -240,15 +280,14 @@ program
 
       if (result.allowed) {
         console.log(chalk.green(`✅ Command allowed: ${command}`));
-        process.exit(0);
       } else {
         console.log(chalk.red(`❌ Command denied: ${command}`));
         console.log(chalk.gray(`   Reason: ${result.reason}`));
-        process.exit(1);
+        process.exitCode = 1;
       }
     } catch (error) {
       console.error(chalk.red(`\n💥 Error: ${error.message}`));
-      process.exit(1);
+      process.exitCode = 1;
     }
   });
 
@@ -297,11 +336,49 @@ program
     }
   });
 
+// 技能列表命令
+program
+  .command('skills')
+  .description('列出所有已注册的技能')
+  .option('--agent <role>', '按 Agent 角色过滤 (explore/plan/general/inspector)')
+  .action(async (options) => {
+    try {
+      const { SkillLoader } = require('./skill-loader');
+      const loader = new SkillLoader({ rootDir: process.cwd() });
+      await loader.loadRegistry();
+
+      const skills = loader.listSkills(options.agent);
+
+      if (skills.length === 0) {
+        console.log(chalk.yellow('未找到技能。请检查 .flowharness/skills/registry.json'));
+        return;
+      }
+
+      console.log(chalk.blue(`\n📚 Flow Harness 技能列表 (${skills.length} 个)\n`));
+
+      let currentAgent = '';
+      for (const skill of skills) {
+        const agent = skill.agent || options.agent || skill.owner_agent || '';
+        if (agent !== currentAgent) {
+          currentAgent = agent;
+          console.log(chalk.cyan(`  [${agent.toUpperCase()}]`));
+        }
+        const status = skill.status === 'active' ? chalk.green('●') : chalk.gray('○');
+        console.log(`    ${status} ${skill.id} - ${skill.name || skill.id}`);
+      }
+      console.log('');
+    } catch (err) {
+      console.error(chalk.red('加载技能失败:'), err.message);
+      process.exit(1);
+    }
+  });
+
 // Supervisor 命令
 program
   .command('supervisor <task>')
   .description('Execute task using Supervisor Agent (6-step workflow)')
-  .option('-c, --config <path>', 'Config file path', '.flowharness/config.yml')
+  .option('-c, --config <path>', 'Config file path (default: auto-resolved via StorageManager)')
+  .option('-p, --project-root <path>', 'Business project root directory (default: cwd)')
   .option('-v, --verbose', 'Verbose output with detailed logs')
   .option('--dry-run', 'Preview execution plan without actually running')
   .option('--json', 'Output results in JSON format')
@@ -309,7 +386,9 @@ program
   .option('--max-retries <number>', 'Maximum retry attempts (default: 2)', '2')
   .action(async (task, options) => {
     try {
-      const supervisor = new SupervisorAgent(options.config);
+      const supervisor = new SupervisorAgent(options.config || null, {
+        projectRoot: options.projectRoot
+      });
 
       // Dry-run 模式：只显示执行计划
       if (options.dryRun) {
@@ -616,6 +695,42 @@ program
     }
   });
 
+// Token 预算报告命令
+program
+  .command('budget')
+  .description('Show token budget report with compression savings')
+  .option('-c, --config <path>', 'Config file path', '.flowharness/config.yml')
+  .action(async (options) => {
+    try {
+      const { TokenCompressor } = require('./token-compressor');
+      const compressor = new TokenCompressor();
+      const report = compressor.getBudgetReport();
+
+      console.log(chalk.blue('\n== Flow Harness Token 预算报告 ==\n'));
+
+      console.log(chalk.cyan(`今日 (${report.daily.date}):`));
+      console.log(`  已用: ${report.daily.used.toLocaleString()} tokens`);
+      console.log(`  压缩节省: ${report.daily.saved.toLocaleString()} tokens`);
+
+      if (Object.keys(report.daily.by_type).length > 0) {
+        console.log(chalk.cyan('\n按任务类型:'));
+        const sorted = Object.entries(report.daily.by_type).sort((a, b) => b[1] - a[1]);
+        for (const [type, count] of sorted) {
+          const pct = report.daily.used > 0 ? ((count / report.daily.used) * 100).toFixed(0) : 0;
+          const bar = '█'.repeat(Math.ceil(pct / 10)) + '░'.repeat(10 - Math.ceil(pct / 10));
+          console.log(`  ${type.padEnd(15)} ${bar}  ${count.toLocaleString()}  (${pct}%)`);
+        }
+      }
+
+      console.log(chalk.cyan(`\n本月 (${report.monthly.month}):`));
+      console.log(`  已用: ${report.monthly.used.toLocaleString()} / ${report.monthly.budget.toLocaleString()} tokens (${report.monthly.utilization})`);
+      console.log('');
+    } catch (error) {
+      console.error(chalk.red(`\n💥 Error: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
 // 文档生成命令
 program
   .command('docs')
@@ -820,6 +935,420 @@ program
 
     } catch (error) {
       console.error(chalk.red(`\n💥 Import failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+// ============ 斜杠命令系统 ============
+program
+  .command('cmd <slash_command> [args...]')
+  .description('执行预定义斜杠命令 (如 /plan, /build, /review 等)')
+  .addHelpText('after', `
+示例:
+  $ flowharness cmd /plan 用户认证功能
+  $ flowharness cmd /build 实现注册接口
+  $ flowharness cmd /fix 登录Bug
+  $ flowharness cmd /review src/index.js
+  $ flowharness cmd /status
+`)
+  .action(async (slashCmd, args) => {
+    try {
+      const fs = require('fs');
+      const cmdRegistryPath = path.join(process.cwd(), '.flowharness', 'commands', 'registry.json');
+      
+      if (!fs.existsSync(cmdRegistryPath)) {
+        console.error(chalk.red('命令注册表不存在: .flowharness/commands/registry.json'));
+        console.log(chalk.gray('运行 flowharness init 初始化'));
+        process.exit(1);
+      }
+      
+      const cmdRegistry = JSON.parse(fs.readFileSync(cmdRegistryPath, 'utf8'));
+      
+      const cmdKey = slashCmd.startsWith('/') ? slashCmd : `/${slashCmd}`;
+      const cmdDef = cmdRegistry.commands[cmdKey];
+      
+      if (!cmdDef) {
+        console.error(chalk.red(`未知命令: ${cmdKey}`));
+        console.log(chalk.cyan('\n可用命令:'));
+        for (const [key, def] of Object.entries(cmdRegistry.commands)) {
+          console.log(`  ${chalk.green(key.padEnd(15))} ${def.description}`);
+        }
+        process.exit(1);
+      }
+      
+      const argsStr = args.join(' ');
+      
+      if (cmdDef.type === 'management') {
+        await handleManagementCommand(cmdDef.action, argsStr);
+        return;
+      }
+      
+      if (cmdDef.type === 'workflow') {
+        console.log(chalk.blue(`\n🚀 执行命令: ${cmdKey} ${argsStr}\n`));
+        
+        const configPath = path.join(process.cwd(), '.flowharness', 'config.yml');
+        const supervisor = new SupervisorAgent(configPath);
+        
+        const taskDesc = `${cmdDef.description}: ${argsStr}`;
+        const isDryRun = (cmdDef.flags || []).includes('--dry-run');
+        
+        if (isDryRun) {
+          const analysis = await supervisor.step1_analyze(taskDesc, {});
+          const decomposition = await supervisor.step2_decompose(analysis);
+          console.log(chalk.cyan('📋 执行计划 (预览):'));
+          console.log(`  类型: ${analysis.type}`);
+          console.log(`  子任务: ${decomposition.subtasks?.length || 0} 个`);
+          if (decomposition.subtasks) {
+            decomposition.subtasks.forEach((st, i) => {
+              console.log(`  ${i + 1}. ${st.name}`);
+            });
+          }
+        } else {
+          const result = await supervisor.handleTask(taskDesc, {});
+          console.log(result.success ? chalk.green('✅ 完成') : chalk.red('❌ 失败'));
+        }
+        return;
+      }
+      
+      if (cmdDef.type === 'inspector') {
+        console.log(chalk.blue(`\n🔍 执行检查: ${cmdKey} ${argsStr}\n`));
+        
+        const configPath = path.join(process.cwd(), '.flowharness', 'config.yml');
+        const supervisor = new SupervisorAgent(configPath);
+        
+        const taskDesc = `代码检查 - ${cmdDef.description}: ${argsStr}`;
+        const result = await supervisor.handleTask(taskDesc, {
+          forceAgent: 'inspector',
+          skills: cmdDef.skills
+        });
+        console.log(result.success ? chalk.green('✅ 检查通过') : chalk.yellow('⚠️ 发现问题'));
+        return;
+      }
+      
+    } catch (err) {
+      console.error(chalk.red(`命令执行失败: ${err.message}`));
+      process.exit(1);
+    }
+  });
+
+async function handleManagementCommand(action, args) {
+  const fs = require('fs');
+  
+  switch (action) {
+    case 'show_status': {
+      console.log(chalk.blue('\n📊 Flow Harness 系统状态\n'));
+      const patternsPath = path.join(process.cwd(), '.flowharness', 'knowledge', 'patterns.json');
+      if (fs.existsSync(patternsPath)) {
+        const patterns = JSON.parse(fs.readFileSync(patternsPath, 'utf8'));
+        console.log(`  总运行: ${patterns.statistics?.total_runs || 0} 次`);
+        console.log(`  成功: ${patterns.statistics?.successful_runs || 0}`);
+        console.log(`  失败: ${patterns.statistics?.failed_runs || 0}`);
+        const rate = patterns.statistics?.total_runs
+          ? ((patterns.statistics.successful_runs / patterns.statistics.total_runs) * 100).toFixed(1)
+          : 0;
+        console.log(`  成功率: ${rate}%`);
+      }
+      console.log('');
+      break;
+    }
+    
+    case 'show_budget': {
+      console.log(chalk.blue('\n💰 Token 预算（Phase D 实现后完善）\n'));
+      console.log(chalk.gray('  尚未配置 Token 追踪'));
+      console.log('');
+      break;
+    }
+    
+    case 'list_skills': {
+      const { SkillLoader } = require('./skill-loader');
+      const loader = new SkillLoader({ rootDir: process.cwd() });
+      await loader.loadRegistry();
+      const skills = loader.listSkills();
+      console.log(chalk.blue(`\n📚 技能列表 (${skills.length} 个)\n`));
+      for (const s of skills) {
+        console.log(`  ${chalk.green('●')} [${(s.agent || '').padEnd(10)}] ${s.id}`);
+      }
+      console.log('');
+      break;
+    }
+    
+    case 'show_history': {
+      console.log(chalk.blue('\n📜 最近执行历史\n'));
+      const patternsPath = path.join(process.cwd(), '.flowharness', 'knowledge', 'patterns.json');
+      if (fs.existsSync(patternsPath)) {
+        const patterns = JSON.parse(fs.readFileSync(patternsPath, 'utf8'));
+        const allPatterns = [
+          ...(patterns.successful_patterns || []),
+          ...(patterns.failure_patterns || [])
+        ].sort((a, b) => new Date(b.learned_at) - new Date(a.learned_at)).slice(0, 10);
+        
+        for (const p of allPatterns) {
+          const icon = p.success_rate ? chalk.green('✓') : chalk.red('✗');
+          console.log(`  ${icon} ${p.pattern} (${p.success_count || p.failure_count || 0} runs)`);
+        }
+      }
+      console.log('');
+      break;
+    }
+    
+    default:
+      console.log(chalk.yellow(`未知管理命令: ${action}`));
+  }
+}
+
+// ============================================================
+// 外部技能命令 (Step G4)
+// ============================================================
+
+// 网站克隆引导命令
+program
+  .command('clone <url>')
+  .description('Clone a website using ai-website-cloner template (requires Claude Code)')
+  .option('-o, --output <dir>', 'Output directory', './cloned-site')
+  .option('--dry-run', 'Show instructions without executing', false)
+  .action(async (url, options) => {
+    const outputDir = options.output;
+
+    console.log(chalk.blue('\n🌐 网站克隆功能\n'));
+    console.log(chalk.gray('此功能需要 Claude Code 或兼容的 AI 编码环境。\n'));
+
+    if (options.dryRun) {
+      console.log(chalk.cyan('📋 执行步骤预览:\n'));
+      console.log(`  1. git clone https://github.com/JCodesMore/ai-website-cloner-template.git ${outputDir}`);
+      console.log(`  2. cd ${outputDir} && npm install`);
+      console.log(`  3. claude --chrome`);
+      console.log(`  4. /clone-website ${url}\n`);
+      console.log(chalk.gray('移除 --dry-run 参数以显示详细指南。\n'));
+      return;
+    }
+
+    console.log(chalk.cyan('📋 请按以下步骤操作:\n'));
+    console.log(chalk.white(`1. 克隆模板:`));
+    console.log(chalk.gray(`   git clone https://github.com/JCodesMore/ai-website-cloner-template.git ${outputDir}`));
+    console.log(chalk.white(`\n2. 安装依赖:`));
+    console.log(chalk.gray(`   cd ${outputDir} && npm install`));
+    console.log(chalk.white(`\n3. 启动 Claude Code:`));
+    console.log(chalk.gray(`   claude --chrome`));
+    console.log(chalk.white(`\n4. 执行克隆:`));
+    console.log(chalk.gray(`   /clone-website ${url}`));
+    console.log(chalk.green(`\n✨ 完成后，克隆的网站将生成在 ${outputDir}/\n`));
+
+    console.log(chalk.yellow('💡 提示:'));
+    console.log(chalk.gray('   - 需要安装 Claude Code CLI (npm install -g @anthropic-ai/claude-code)'));
+    console.log(chalk.gray('   - 需要 Chrome 浏览器'));
+    console.log(chalk.gray('   - 支持 Claude Code, Cursor, Windsurf 等 AI 编码环境\n'));
+  });
+
+// 列出外部技能命令
+program
+  .command('external-skills')
+  .description('List all registered external skills')
+  .action(async () => {
+    const fs = require('fs');
+    const registryPath = path.join(process.cwd(), '.flowharness', 'skills', 'registry.json');
+
+    if (!fs.existsSync(registryPath)) {
+      console.log(chalk.yellow('技能注册表不存在'));
+      return;
+    }
+
+    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    const external = registry.external || [];
+
+    if (external.length === 0) {
+      console.log(chalk.gray('没有注册的外部技能'));
+      return;
+    }
+
+    console.log(chalk.blue('\n📦 外部技能列表:\n'));
+
+    for (const skill of external) {
+      console.log(chalk.cyan(`  ${skill.id}`) + chalk.gray(` - ${skill.description}`));
+      console.log(chalk.gray(`    仓库: ${skill.repository}`));
+      console.log(chalk.gray(`    前置: ${skill.prerequisites.join(', ')}`));
+      console.log('');
+    }
+  });
+
+// ============================================================
+// CI/CD 集成命令 (P1)
+// ============================================================
+
+const ciCmd = program
+  .command('ci')
+  .description('CI/CD 集成工具');
+
+ciCmd
+  .command('generate')
+  .description('生成 CI/CD 配置文件')
+  .option('-p, --platform <platform>', 'CI 平台 (github/gitlab/jenkins)', 'github')
+  .option('-o, --output <dir>', '输出目录', '.github/workflows')
+  .action(async (options) => {
+    try {
+      const { CICDIntegration } = require('./ci-cd-integration');
+      const ci = new CICDIntegration({
+        projectDir: process.cwd(),
+        outputDir: options.output,
+        platform: options.platform
+      });
+
+      console.log(chalk.blue('\n🔧 生成 CI/CD 配置...\n'));
+
+      const result = ci.generateWorkflow();
+
+      console.log(chalk.green(`✅ 生成成功!`));
+      console.log(chalk.gray(`   平台: ${options.platform}`));
+      console.log(chalk.gray(`   输出目录: ${options.output}`));
+      result.files.forEach(f => {
+        console.log(chalk.gray(`   - ${f}`));
+      });
+    } catch (error) {
+      console.error(chalk.red(`\n💥 生成失败: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+ciCmd
+  .command('check')
+  .description('检查 CI/CD 配置是否完整')
+  .action(async () => {
+    try {
+      const { CICDIntegration } = require('./ci-cd-integration');
+      const ci = new CICDIntegration({ projectDir: process.cwd() });
+
+      console.log(chalk.blue('\n🔍 检查 CI/CD 配置...\n'));
+
+      const result = ci.checkConfiguration();
+
+      if (result.valid) {
+        console.log(chalk.green('✅ CI/CD 配置完整'));
+      } else {
+        console.log(chalk.yellow('⚠️ CI/CD 配置不完整'));
+        result.issues.forEach(issue => {
+          console.log(chalk.gray(`   - ${issue}`));
+        });
+      }
+    } catch (error) {
+      console.error(chalk.red(`\n💥 检查失败: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+// ============================================================
+// Metrics 命令 (P1)
+// ============================================================
+
+program
+  .command('metrics')
+  .description('查看系统指标统计')
+  .option('-f, --format <format>', '输出格式 (text/json/prometheus)', 'text')
+  .option('-o, --output <file>', '输出到文件')
+  .action(async (options) => {
+    try {
+      const { MetricsCollector } = require('./metrics-collector');
+      const collector = new MetricsCollector({ prefix: 'flowharness' });
+
+      console.log(chalk.blue('\n📊 Flow Harness 指标统计\n'));
+
+      // 收集系统指标
+      const metrics = collector.collectSystemMetrics();
+
+      if (options.format === 'prometheus') {
+        const prometheus = collector.exportPrometheus();
+        if (options.output) {
+          fs.writeFileSync(options.output, prometheus);
+          console.log(chalk.green(`✅ 已输出到 ${options.output}`));
+        } else {
+          console.log(prometheus);
+        }
+      } else if (options.format === 'json') {
+        const json = JSON.stringify(metrics, null, 2);
+        if (options.output) {
+          fs.writeFileSync(options.output, json);
+          console.log(chalk.green(`✅ 已输出到 ${options.output}`));
+        } else {
+          console.log(json);
+        }
+      } else {
+        // text 格式
+        console.log(chalk.cyan('任务统计:'));
+        console.log(`  总任务数: ${metrics.tasks?.total || 0}`);
+        console.log(`  成功: ${metrics.tasks?.success || 0}`);
+        console.log(`  失败: ${metrics.tasks?.failed || 0}`);
+        console.log('');
+        console.log(chalk.cyan('执行统计:'));
+        console.log(`  平均耗时: ${metrics.execution?.avgDuration || 0}ms`);
+        console.log(`  最大耗时: ${metrics.execution?.maxDuration || 0}ms`);
+        console.log('');
+        console.log(chalk.cyan('Token 统计:'));
+        console.log(`  今日使用: ${metrics.tokens?.today || 0}`);
+        console.log(`  本月使用: ${metrics.tokens?.month || 0}`);
+      }
+    } catch (error) {
+      console.error(chalk.red(`\n💥 获取指标失败: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+// ============================================================
+// Checkpoint 命令 (P1)
+// ============================================================
+
+program
+  .command('checkpoint')
+  .description('检查点管理');
+
+const checkpointCmd = program
+  .command('checkpoint')
+  .description('检查点管理');
+
+checkpointCmd
+  .command('list')
+  .description('列出所有检查点')
+  .action(async () => {
+    try {
+      const { CheckpointManager } = require('./checkpoint-manager');
+      const cm = new CheckpointManager({});
+
+      console.log(chalk.blue('\n📍 检查点列表:\n'));
+
+      const checkpoints = cm.list();
+
+      if (checkpoints.length === 0) {
+        console.log(chalk.gray('  无检查点'));
+        return;
+      }
+
+      for (const cp of checkpoints) {
+        const age = Math.round((Date.now() - new Date(cp.createdAt).getTime()) / 60000);
+        console.log(chalk.cyan(`  ${cp.id}`) + chalk.gray(` (${age}分钟前, 状态: ${cp.status})`));
+      }
+    } catch (error) {
+      console.error(chalk.red(`\n💥 获取检查点失败: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+checkpointCmd
+  .command('restore <id>')
+  .description('恢复到指定检查点')
+  .action(async (id) => {
+    try {
+      const { CheckpointManager } = require('./checkpoint-manager');
+      const cm = new CheckpointManager({});
+
+      console.log(chalk.blue(`\n🔄 恢复检查点: ${id}\n`));
+
+      const result = await cm.restore(id);
+
+      if (result.success) {
+        console.log(chalk.green('✅ 恢复成功'));
+        console.log(chalk.gray(`   恢复路径: ${result.restoredFiles?.length || 0} 个文件`));
+      } else {
+        console.log(chalk.red(`❌ 恢复失败: ${result.error}`));
+      }
+    } catch (error) {
+      console.error(chalk.red(`\n💥 恢复失败: ${error.message}`));
       process.exit(1);
     }
   });

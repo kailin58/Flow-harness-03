@@ -164,7 +164,13 @@ class DeviationDetector {
     const stdDev = stats.stdDevDuration;
 
     // 计算偏差（标准差倍数）
-    const deviation = Math.abs(duration - avg) / (stdDev || 1);
+    // 当标准差为0时：如果duration等于avg则偏差为0，否则为无穷大
+    let deviation;
+    if (stdDev > 0) {
+      deviation = Math.abs(duration - avg) / stdDev;
+    } else {
+      deviation = duration === avg ? 0 : Infinity;
+    }
 
     if (deviation > this.config.deviationThreshold) {
       const severity = deviation > this.config.deviationThreshold * 2 ? 'high' : 'medium';

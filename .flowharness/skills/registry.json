@@ -1,0 +1,138 @@
+{
+  "version": "1.0",
+  "description": "Flow Harness 技能注册表 - 为 4 个总监 Agent 提供专业能力增强",
+  "skills": {
+    "explore": [
+      {
+        "id": "code-search",
+        "name": "代码搜索技能",
+        "path": ".flowharness/skills/explore/code-search.md",
+        "triggers": ["搜索代码", "定位文件", "查找实现", "代码在哪", "find", "search", "grep"],
+        "status": "active"
+      },
+      {
+        "id": "dependency-map",
+        "name": "依赖图谱技能",
+        "path": ".flowharness/skills/explore/dependency-map.md",
+        "triggers": ["依赖关系", "模块依赖", "import", "require", "引用分析"],
+        "status": "active"
+      },
+      {
+        "id": "context-gather",
+        "name": "上下文收集技能",
+        "path": ".flowharness/skills/explore/context-gather.md",
+        "triggers": ["收集上下文", "了解现状", "分析项目", "项目结构", "目录结构"],
+        "status": "active"
+      }
+    ],
+    "plan": [
+      {
+        "id": "risk-assessment",
+        "name": "风险评估技能",
+        "path": ".flowharness/skills/plan/risk-assessment.md",
+        "triggers": ["风险", "risk", "评估风险", "安全影响", "影响分析"],
+        "status": "active"
+      },
+      {
+        "id": "tech-selection",
+        "name": "技术选型技能",
+        "path": ".flowharness/skills/plan/tech-selection.md",
+        "triggers": ["技术选型", "框架选择", "工具选择", "方案对比", "技术栈"],
+        "status": "active"
+      },
+      {
+        "id": "arch-design",
+        "name": "架构设计技能",
+        "path": ".flowharness/skills/plan/arch-design.md",
+        "triggers": ["架构", "设计方案", "系统设计", "模块设计", "接口设计"],
+        "status": "active"
+      }
+    ],
+    "general": [
+      {
+        "id": "tdd-workflow",
+        "name": "TDD 工作流技能",
+        "path": ".flowharness/skills/general/tdd-workflow.md",
+        "triggers": ["测试", "TDD", "test", "先写测试", "测试驱动", "单元测试"],
+        "status": "active"
+      },
+      {
+        "id": "refactor-guide",
+        "name": "重构指南技能",
+        "path": ".flowharness/skills/general/refactor-guide.md",
+        "triggers": ["重构", "refactor", "优化代码", "代码整理", "消除重复"],
+        "status": "active"
+      },
+      {
+        "id": "api-design",
+        "name": "API 设计技能",
+        "path": ".flowharness/skills/general/api-design.md",
+        "triggers": ["API", "接口", "endpoint", "REST", "路由设计"],
+        "status": "active"
+      }
+    ],
+    "inspector": [
+      {
+        "id": "security-review",
+        "name": "安全审查技能",
+        "path": ".flowharness/skills/inspector/security-review.md",
+        "triggers": ["安全", "security", "漏洞", "vulnerability", "安全扫描", "审计"],
+        "status": "active"
+      },
+      {
+        "id": "code-review",
+        "name": "代码审查技能",
+        "path": ".flowharness/skills/inspector/code-review.md",
+        "triggers": ["代码审查", "code review", "review", "代码质量", "PR审查"],
+        "status": "active"
+      },
+      {
+        "id": "antipattern-detect",
+        "name": "反模式检测技能",
+        "path": ".flowharness/skills/inspector/antipattern-detect.md",
+        "triggers": ["反模式", "antipattern", "bad practice", "代码坏味道", "质量检查"],
+        "status": "active"
+      }
+    ]
+  },
+  "external": [
+    {
+      "id": "clone-website",
+      "name": "网站克隆",
+      "description": "反向工程并克隆任意网站为 Next.js 代码",
+      "type": "external",
+      "prerequisites": [
+        "node >= 24",
+        "claude-code or compatible AI agent"
+      ],
+      "workflow": [
+        {
+          "step": "clone_template",
+          "action": "git clone https://github.com/JCodesMore/ai-website-cloner-template.git",
+          "description": "克隆网站克隆模板"
+        },
+        {
+          "step": "install_deps",
+          "action": "npm install",
+          "description": "安装依赖"
+        },
+        {
+          "step": "run_agent",
+          "action": "claude --chrome",
+          "description": "启动 Claude Code（带浏览器）"
+        },
+        {
+          "step": "execute",
+          "action": "/clone-website <url>",
+          "description": "执行网站克隆技能"
+        }
+      ],
+      "output": {
+        "type": "nextjs_project",
+        "description": "生成一个完整的 Next.js 项目"
+      },
+      "repository": "https://github.com/JCodesMore/ai-website-cloner-template",
+      "license": "MIT"
+    }
+  ]
+}

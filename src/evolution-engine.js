@@ -73,7 +73,7 @@ class EvolutionEngine {
     this.config = {
       minSamples: options.minSamples || 5,
       verifyRounds: options.verifyRounds || 3,
-      confidenceThreshold: options.confidenceThreshold || 0.7,
+      confidenceThreshold: options.confidenceThreshold || 0.65,
       maxStrategies: options.maxStrategies || 100,
       crossProjectEnabled: options.crossProjectEnabled !== false
     };
@@ -292,9 +292,10 @@ class EvolutionEngine {
     const successStrategies = this._learnFromSuccess();
     newStrategies.push(...successStrategies);
 
-    // 3b: 从失败模式学习
+    // 3b: 从失败模式学习（过滤噪声后）
     const failureStrategies = this._learnFromFailure();
-    newStrategies.push(...failureStrategies);
+    const filteredFailures = this._filterSpuriousFailures(failureStrategies, successStrategies);
+    newStrategies.push(...filteredFailures);
 
     // 3c: 从时间模式学习
     const timeStrategies = this._learnTimePatterns();
@@ -496,6 +497,23 @@ class EvolutionEngine {
     return strategies;
   }
 
+  /**
+   * 过滤虚假失败模式（模拟执行噪声）
+   * 同一个 pattern 同时出现在成功和失败列表中，且失败次数 < 5 时视为噪声
+   */
+  _filterSpuriousFailures(failurePatterns, successPatterns) {
+    if (!failurePatterns || !successPatterns) return failurePatterns || [];
+
+    const successSet = new Set(successPatterns.map(p => p.pattern));
+
+    return failurePatterns.filter(fp => {
+      if (successSet.has(fp.pattern) && (fp.sampleCount || fp.total_count || 0) < 5) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   _findMostCommon(arr) {
     if (arr.length === 0) return null;
     const counts = {};
@@ -549,6 +567,7 @@ class EvolutionEngine {
     const result = {
       strategyId: strategy.id,
       pattern: strategy.pattern,
+      strategyType: strategy.type,
       timestamp: new Date().toISOString(),
       checks: [],
       passed: true,
@@ -585,9 +604,10 @@ class EvolutionEngine {
       detail: conflictCheck ? '无冲突' : '与现有活跃策略冲突'
     });
 
-    // Check 4: 历史验证 — 同类策略的验证通过率
+    // Check 4: 历史验证 — 同类策略的验证通过率（按 strategyType 匹配，兼容旧记录）
     const sameTypeVerifications = this.verificationResults.filter(
-      v => v.pattern.startsWith(strategy.type)
+      v => v.strategyType === strategy.type ||
+           (v.strategyType === undefined && v.pattern === strategy.pattern)
     );
     const historyCheck = sameTypeVerifications.length < 3 ||
       sameTypeVerifications.filter(v => v.passed).length / sameTypeVerifications.length >= 0.5;
@@ -735,7 +755,7 @@ class EvolutionEngine {
    */
   exportStrategies(projectId) {
     const exportable = this.strategies.filter(s =>
-      s.status === STRATEGY_STATUS.ACTIVE && s.confidence >= 0.8
+      s.status === STRATEGY_STATUS.ACTIVE && s.confidence >= this.config.confidenceThreshold
     );
 
     const pack = {
