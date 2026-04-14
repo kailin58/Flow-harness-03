@@ -3,15 +3,18 @@
  * AgentRegistry — Agent 注册表
  *
  * ╔══════════════════════════════════════════════════════════════════╗
- * ║  1+5 架构写死在模块顶部三张冻结常量表中，不可在运行时增删改      ║
+ * ║  4层架构写死在模块顶部三张冻结常量表中，不可在运行时增删改        ║
  * ║  CORE_AGENTS / TASK_TYPE_MAP / CEO_FORBIDDEN 是唯一权威来源      ║
  * ║  initializeCoreAgents() 只读表，不重新定义角色                   ║
  * ╚══════════════════════════════════════════════════════════════════╝
  *
- * 层级定义：
+ * 4层组织架构（与 AGENTS.md 对齐）：
  *   level 0 = CEO (supervisor)
- *   level 1 = 总监（directors，固定 5 个）
- *   level 2 = 子Agent（sub-agents，按需动态注册，挂在某个总监下）
+ *   level 1 = VP层（副总，VP01数字技术VP写死；其他VP按需激活）
+ *   level 2 = 总监（directors，VP01下6个；其他VP总监按需注册）
+ *   level 3 = 子Agent（sub-agents，按需动态注册，挂在某个总监下）
+ *
+ * 注：副Deep Agent 是子Agent的运行时计算扩展单元，不构成第5个永久层级。
  */
 
 // ══════════════════════════════════════════════════════════════════
@@ -20,10 +23,14 @@
 
 const CEO_ID = 'supervisor';
 
+// VP ID 集合（写死；VP01数字技术VP为唯一预置VP，其他VP按需激活）
+const VP_IDS = new Set(['vp_digital']);
+Object.freeze(VP_IDS);
+
 // 预置总监 ID 集合（驱动自 CORE_AGENTS，不单独维护）
-// 此处声明为 const，在 selfCheck 后由 CORE_AGENTS 填充并冻结
-const DIRECTOR_IDS = new Set(['explore', 'plan', 'general', 'inspector', 'research']);
-Object.freeze(DIRECTOR_IDS);   // freeze Set 本身（add/delete/clear 会静默失败/严格模式报错）
+// VP01下6个总监，与 AGENTS.md 对齐
+const DIRECTOR_IDS = new Set(['explore', 'plan', 'general', 'inspector', 'research', 'digitalops']);
+Object.freeze(DIRECTOR_IDS);
 
 // ══════════════════════════════════════════════════════════════════
 //  ★ 核心 Agent 定义表（写死，不可增删改）
@@ -43,84 +50,115 @@ Object.freeze(DIRECTOR_IDS);   // freeze Set 本身（add/delete/clear 会静默
 
 const CORE_AGENTS = Object.freeze([
 
-  // ── CEO: Supervisor Agent ────────────────────────────────────────
+  // ── CEO: Supervisor Agent (level 0) ─────────────────────────────
   Object.freeze({
     id:               'supervisor',
     name:             'Supervisor Agent',
     role:             'CEO',
     level:            0,
     parentId:         null,
-    capabilities:     Object.freeze(['analyze', 'dispatch', 'inspect', 'review', 'optimize']),
-    description:      '领导、调度器、决策者',
-    responsibilities: Object.freeze(['判断', '指挥', '检查', '复盘', '优化']),
-    kbNamespace:      'decisions',    // CEO 写 decisions / schedules / compliance
+    capabilities:     Object.freeze(['analyze', 'dispatch', 'route', 'inspect', 'review', 'optimize']),
+    description:      '决策者、全局调度器',
+    responsibilities: Object.freeze(['路由决策', '跨VP协调', '风险管控', '全局感知', '异常处理']),
+    kbNamespace:      'decisions',
     // CEO 禁止行为（写死）
     forbidden:        Object.freeze(['write_code', 'edit_file', 'run_command', 'execute_task'])
   }),
 
-  // ── 总监1: Explore Agent ─────────────────────────────────────────
+  // ── VP01: 数字技术VP (level 1) ───────────────────────────────────
+  // 系统保障域写死VP，平台控制，不可删改
+  // 下设6个总监（Explore/Plan/General/Inspector/Research/DigitalOps）
+  Object.freeze({
+    id:               'vp_digital',
+    name:             '数字技术VP（Digital）',
+    role:             'VP01',
+    level:            1,
+    parentId:         'supervisor',
+    capabilities:     Object.freeze(['code', 'debug', 'deploy', 'architecture', 'research', 'ops_monitoring',
+                                     'file_ops', 'api_integration', 'testing', 'refactor']),
+    description:      '多行业通用技术底座，任何业务都需要这6个技术能力',
+    responsibilities: Object.freeze(['技术任务路由', '总监资源调配', 'VP间技术协同']),
+    kbNamespace:      'vp_digital',
+    fallback_priority: 1,
+    mutable:          false
+  }),
+
+  // ── 总监1: Explore Agent (level 2, parentId: vp_digital) ────────
   Object.freeze({
     id:               'explore',
     name:             'Explore Agent',
     role:             '总监1',
-    level:            1,
-    parentId:         'supervisor',
+    level:            2,
+    parentId:         'vp_digital',
     capabilities:     Object.freeze(['file_search', 'code_search', 'dependency_analysis', 'structure_analysis']),
     description:      '探索总监、信息收集者',
     responsibilities: Object.freeze(['代码库探索', '文件搜索', '依赖分析', '上下文收集']),
     kbNamespace:      'codebase'
   }),
 
-  // ── 总监2: Plan Agent ────────────────────────────────────────────
+  // ── 总监2: Plan Agent (level 2, parentId: vp_digital) ───────────
   Object.freeze({
     id:               'plan',
     name:             'Plan Agent',
     role:             '总监2',
-    level:            1,
-    parentId:         'supervisor',
+    level:            2,
+    parentId:         'vp_digital',
     capabilities:     Object.freeze(['architecture_design', 'tech_selection', 'risk_assessment', 'task_decomposition']),
     description:      '规划总监、架构师',
     responsibilities: Object.freeze(['架构设计', '方案规划', '风险评估', '任务拆解']),
     kbNamespace:      'plans'
   }),
 
-  // ── 总监3: General-Purpose Agent ────────────────────────────────
+  // ── 总监3: General-Purpose Agent (level 2, parentId: vp_digital) ─
   Object.freeze({
     id:               'general',
     name:             'General-Purpose Agent',
     role:             '总监3',
-    level:            1,
-    parentId:         'supervisor',
+    level:            2,
+    parentId:         'vp_digital',
     capabilities:     Object.freeze(['code_writing', 'file_editing', 'command_execution', 'multi_step_tasks']),
     description:      '执行总监、实施者',
     responsibilities: Object.freeze(['代码编写', '文件操作', '命令执行', '多步骤任务']),
     kbNamespace:      'changes'
   }),
 
-  // ── 总监4: Inspector Agent ───────────────────────────────────────
+  // ── 总监4: Inspector Agent (level 2, parentId: vp_digital) ──────
   Object.freeze({
     id:               'inspector',
     name:             'Inspector Agent',
     role:             '总监4',
-    level:            1,
-    parentId:         'supervisor',
+    level:            2,
+    parentId:         'vp_digital',
     capabilities:     Object.freeze(['code_review', 'testing', 'security_scan', 'quality_check']),
     description:      '质检总监、检查者',
     responsibilities: Object.freeze(['代码审查', '测试执行', '安全扫描', '质量检查']),
     kbNamespace:      'quality'
   }),
 
-  // ── 总监5: Research Agent ────────────────────────────────────────
+  // ── 总监5: Research Agent (level 2, parentId: vp_digital) ───────
   Object.freeze({
     id:               'research',
     name:             'Research Agent',
     role:             '总监5',
-    level:            1,
-    parentId:         'supervisor',
+    level:            2,
+    parentId:         'vp_digital',
     capabilities:     Object.freeze(['web_search', 'fetch_url', 'doc_lookup', 'api_reference', 'knowledge_retrieval']),
     description:      '研究总监、资料搜集者',
     responsibilities: Object.freeze(['网络搜索', '文档查询', 'API参考检索', '知识获取']),
     kbNamespace:      'external'
+  }),
+
+  // ── 总监6: DigitalOps Agent (level 2, parentId: vp_digital) ─────
+  Object.freeze({
+    id:               'digitalops',
+    name:             'DigitalOps Agent',
+    role:             '总监6',
+    level:            2,
+    parentId:         'vp_digital',
+    capabilities:     Object.freeze(['ops_monitoring', 'dashboard', 'anomaly_detection', 'metrics_collection', 'flow_monitoring']),
+    description:      '数字化运营总监',
+    responsibilities: Object.freeze(['数字化流程监控', '系统运行状态跟踪', '数据看板与指标汇总', '运营异常识别与上报']),
+    kbNamespace:      'ops'
   })
 ]);
 
@@ -133,24 +171,35 @@ const CORE_AGENTS = Object.freeze([
 
 const TASK_TYPE_MAP = Object.freeze({
   // Explore Agent 负责
-  'explore':       'explore',
+  'explore':            'explore',
+  'file_search':        'explore',
+  'code_search':        'explore',
   // Plan Agent 负责
-  'analyze':       'plan',
-  'plan':          'plan',
+  'analyze':            'plan',
+  'plan':               'plan',
+  'design':             'plan',
   // General-Purpose Agent 负责
-  'code':          'general',
-  'write':         'general',
-  'execute':       'general',
+  'code':               'general',
+  'write':              'general',
+  'execute':            'general',
+  'implement':          'general',
+  'refactor':           'general',
   // Inspector Agent 负责
-  'test':          'inspector',
-  'review':        'inspector',
-  'inspect':       'inspector',
+  'test':               'inspector',
+  'review':             'inspector',
+  'inspect':            'inspector',
+  'security_scan':      'inspector',
   // Research Agent 负责
-  'research':      'research',
-  'web_search':    'research',
-  'doc_lookup':    'research',
-  'api_reference': 'research',
-  'fetch_url':     'research'
+  'research':           'research',
+  'web_search':         'research',
+  'doc_lookup':         'research',
+  'api_reference':      'research',
+  'fetch_url':          'research',
+  // DigitalOps Agent 负责
+  'ops_monitoring':     'digitalops',
+  'dashboard':          'digitalops',
+  'anomaly_detection':  'digitalops',
+  'metrics':            'digitalops'
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -163,9 +212,9 @@ const CEO_FORBIDDEN = CORE_AGENTS.find(a => a.id === CEO_ID).forbidden;
 //  运行时自检（模块加载时执行一次）
 // ══════════════════════════════════════════════════════════════════
 (function selfCheck() {
-  // 必须恰好 6 个角色（1 CEO + 5 总监）
-  if (CORE_AGENTS.length !== 6) {
-    throw new Error(`[AgentRegistry] CORE_AGENTS 必须恰好 6 个角色，当前 ${CORE_AGENTS.length} 个`);
+  // 4层架构：1 CEO(L0) + 1 VP01(L1) + 6 总监(L2) = 8 核心角色
+  if (CORE_AGENTS.length !== 8) {
+    throw new Error(`[AgentRegistry] CORE_AGENTS 必须恰好 8 个角色（1 CEO + 1 VP + 6 总监），当前 ${CORE_AGENTS.length} 个`);
   }
 
   // 必须恰好 1 个 level-0（CEO）
@@ -174,28 +223,44 @@ const CEO_FORBIDDEN = CORE_AGENTS.find(a => a.id === CEO_ID).forbidden;
     throw new Error('[AgentRegistry] CORE_AGENTS 必须恰好 1 个 CEO（id=supervisor, level=0）');
   }
 
-  // 必须恰好 5 个 level-1（总监）
-  const directors = CORE_AGENTS.filter(a => a.level === 1);
-  if (directors.length !== 5) {
-    throw new Error(`[AgentRegistry] CORE_AGENTS 必须恰好 5 个总监（level=1），当前 ${directors.length} 个`);
+  // 必须恰好 1 个 level-1（VP01数字技术VP）
+  const vps = CORE_AGENTS.filter(a => a.level === 1);
+  if (vps.length !== 1) {
+    throw new Error(`[AgentRegistry] CORE_AGENTS 必须恰好 1 个VP（level=1），当前 ${vps.length} 个`);
+  }
+  if (vps[0].parentId !== CEO_ID) {
+    throw new Error(`[AgentRegistry] VP "${vps[0].id}" 的 parentId 必须是 "${CEO_ID}"`);
   }
 
-  // 所有总监的 parentId 必须是 CEO_ID
-  for (const d of directors) {
-    if (d.parentId !== CEO_ID) {
-      throw new Error(`[AgentRegistry] 总监 "${d.id}" 的 parentId 必须是 "${CEO_ID}"，当前 "${d.parentId}"`);
+  // VP_IDS 集合必须与 CORE_AGENTS 中 level-1 的 id 一致
+  for (const vp of vps) {
+    if (!VP_IDS.has(vp.id)) {
+      throw new Error(`[AgentRegistry] VP_IDS 缺少 VP id "${vp.id}"`);
     }
   }
 
-  // DIRECTOR_IDS 集合必须与 CORE_AGENTS 中 level-1 的 id 一致
+  // 必须恰好 6 个 level-2（总监，均挂在 VP01 下）
+  const directors = CORE_AGENTS.filter(a => a.level === 2);
+  if (directors.length !== 6) {
+    throw new Error(`[AgentRegistry] CORE_AGENTS 必须恰好 6 个总监（level=2），当前 ${directors.length} 个`);
+  }
+
+  // 所有总监的 parentId 必须是 'vp_digital'
+  for (const d of directors) {
+    if (d.parentId !== 'vp_digital') {
+      throw new Error(`[AgentRegistry] 总监 "${d.id}" 的 parentId 必须是 "vp_digital"，当前 "${d.parentId}"`);
+    }
+  }
+
+  // DIRECTOR_IDS 集合必须与 CORE_AGENTS 中 level-2 的 id 一致
   const directorIds = directors.map(d => d.id);
   for (const id of directorIds) {
     if (!DIRECTOR_IDS.has(id)) {
       throw new Error(`[AgentRegistry] DIRECTOR_IDS 缺少总监 id "${id}"`);
     }
   }
-  if (DIRECTOR_IDS.size !== 5) {
-    throw new Error(`[AgentRegistry] DIRECTOR_IDS 必须恰好 5 个，当前 ${DIRECTOR_IDS.size} 个`);
+  if (DIRECTOR_IDS.size !== 6) {
+    throw new Error(`[AgentRegistry] DIRECTOR_IDS 必须恰好 6 个，当前 ${DIRECTOR_IDS.size} 个`);
   }
 
   // TASK_TYPE_MAP 的所有值必须是合法 Agent ID
@@ -239,7 +304,8 @@ class AgentRegistry {
   // ══════════════════════════════════════════════════════════════
 
   /**
-   * 初始化 6 个核心 Agent（1 CEO + 5 总监）
+   * 初始化 8 个核心 Agent（1 CEO + 1 VP01 + 6 总监）
+   * 4层架构：CEO(L0) → VP01(L1) → 6总监(L2) → 子Agent(L3，动态注册）
    * 数据来源：CORE_AGENTS 冻结常量，不可修改
    */
   initializeCoreAgents() {
@@ -395,10 +461,10 @@ class AgentRegistry {
     const parent = this.get(parentId);
     if (!parent) throw new Error(`[AgentRegistry] 父 Agent 不存在: "${parentId}"`);
 
-    // 父必须是总监（level 1），CEO 不能直接拥有子Agent（跳级禁止）
-    if (parent.level !== 1) {
+    // 父必须是总监（level 2），CEO/VP 不能直接拥有子Agent（跳级禁止）
+    if (parent.level !== 2) {
       throw new Error(
-        `[AgentRegistry] 只有总监（level=1）可以拥有子Agent，"${parentId}"(level=${parent.level}) 不符合`
+        `[AgentRegistry] 只有总监（level=2）可以拥有子Agent，"${parentId}"(level=${parent.level}) 不符合`
       );
     }
 
@@ -413,7 +479,7 @@ class AgentRegistry {
       ...subAgentConfig,
       id:           subId,
       parentId,
-      level:        2,
+      level:        3,   // 4层架构：子Agent是L3
       registeredAt: new Date().toISOString()
     };
 
@@ -436,7 +502,7 @@ class AgentRegistry {
   getLevel(agentId) {
     const agent = this.agents.get(agentId);
     if (agent) return agent.level;
-    if (this.parentIndex.has(agentId)) return 2;
+    if (this.parentIndex.has(agentId)) return 3;   // 4层架构：子Agent(L3)
     return -1;
   }
 
@@ -467,6 +533,7 @@ class AgentRegistry {
 // ══════════════════════════════════════════════════════════════════
 const _exports = AgentRegistry;
 Object.defineProperty(_exports, 'CEO_ID',        { value: CEO_ID,        enumerable: true });
+Object.defineProperty(_exports, 'VP_IDS',        { value: VP_IDS,        enumerable: true });
 Object.defineProperty(_exports, 'DIRECTOR_IDS',  { value: DIRECTOR_IDS,  enumerable: true });
 Object.defineProperty(_exports, 'CORE_AGENTS',   { value: CORE_AGENTS,   enumerable: true });
 Object.defineProperty(_exports, 'TASK_TYPE_MAP', { value: TASK_TYPE_MAP, enumerable: true });

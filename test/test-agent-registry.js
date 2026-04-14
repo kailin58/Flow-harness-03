@@ -100,14 +100,16 @@ function testAgentRegistry() {
     console.log('\nTest 9: 初始化核心 Agent');
     const coreRegistry = new AgentRegistry();
     const coreCount = coreRegistry.initializeCoreAgents();
-    assert(coreCount === 6, '6 个核心 Agent（1 CEO + 5 总监）');
+    assert(coreCount === 8, '8 个核心 Agent（1 CEO + 1 VP + 6 总监）');
     assert(coreRegistry.initialized === true, '标记已初始化');
     assert(coreRegistry.has('supervisor'), '有 supervisor');
+    assert(coreRegistry.has('vp_digital'), '有 vp_digital（VP01数字技术VP）');
     assert(coreRegistry.has('explore'), '有 explore');
     assert(coreRegistry.has('plan'), '有 plan');
     assert(coreRegistry.has('general'), '有 general');
     assert(coreRegistry.has('inspector'), '有 inspector');
     assert(coreRegistry.has('research'), '有 research');
+    assert(coreRegistry.has('digitalops'), '有 digitalops（DigitalOps总监）');
 
     // ---- Test 10: 核心 Agent 角色 ----
     console.log('\nTest 10: 核心 Agent 角色');
@@ -259,10 +261,11 @@ function testAgentRegistry() {
     assert(CORE_AGENTS.every(a => Object.isFrozen(a.capabilities)), '每个 capabilities 冻结');
     assert(CORE_AGENTS.every(a => Object.isFrozen(a.responsibilities)), '每个 responsibilities 冻结');
 
-    // 数量约束
-    assert(CORE_AGENTS.length === 6, 'CORE_AGENTS 恰好 6 个');
+    // 数量约束（4层架构：1 CEO + 1 VP + 6 总监 = 8）
+    assert(CORE_AGENTS.length === 8, 'CORE_AGENTS 恰好 8 个');
     assert(CORE_AGENTS.filter(a => a.level === 0).length === 1, '恰好 1 个 CEO');
-    assert(CORE_AGENTS.filter(a => a.level === 1).length === 5, '恰好 5 个总监');
+    assert(CORE_AGENTS.filter(a => a.level === 1).length === 1, '恰好 1 个 VP（VP01数字技术VP）');
+    assert(CORE_AGENTS.filter(a => a.level === 2).length === 6, '恰好 6 个总监');
 
     // 不可新增
     let caTampered = false;
@@ -336,7 +339,7 @@ function testAgentRegistry() {
     assert(CEO_ID === 'supervisor', 'CEO_ID = supervisor');
     assert(AgentRegistry.CEO_ID === 'supervisor', 'AgentRegistry.CEO_ID 静态属性正确');
     assert(DIRECTOR_IDS instanceof Set, 'DIRECTOR_IDS 是 Set');
-    assert(DIRECTOR_IDS.size === 5, 'DIRECTOR_IDS 恰好 5 个');
+    assert(DIRECTOR_IDS.size === 6, 'DIRECTOR_IDS 恰好 6 个（含DigitalOps）');
     assert(DIRECTOR_IDS.has('explore'),   'DIRECTOR_IDS 含 explore');
     assert(DIRECTOR_IDS.has('plan'),      'DIRECTOR_IDS 含 plan');
     assert(DIRECTOR_IDS.has('general'),   'DIRECTOR_IDS 含 general');
@@ -364,11 +367,17 @@ function testAgentRegistry() {
     catch { protThrew = true; }
     assert(protThrew, 'explore 受保护不可覆盖');
 
-    // CEO 不可直接拥有子Agent（跳级禁止）
+    // CEO/VP 不可直接拥有子Agent（跳级禁止，只有总监level=2可以）
     protThrew = false;
     try { protReg.registerSubAgent('supervisor', { name: 'x', capability: 'y' }); }
-    catch (e) { protThrew = true; assert(e.message.includes('level=1'), 'CEO子Agent错误提示level'); }
+    catch (e) { protThrew = true; assert(e.message.includes('level=0'), 'CEO子Agent错误提示level=0'); }
     assert(protThrew, 'CEO 不可直接拥有子Agent');
+
+    // VP 也不可直接拥有子Agent（VP是L1，只有总监L2可以）
+    protThrew = false;
+    try { protReg.registerSubAgent('vp_digital', { name: 'x', capability: 'y' }); }
+    catch (e) { protThrew = true; assert(e.message.includes('level=1'), 'VP子Agent错误提示level=1'); }
+    assert(protThrew, 'VP 不可直接拥有子Agent');
 
     // ---- Test 27: CORE_AGENTS 驱动 initializeCoreAgents ----
     console.log('\nTest 27: CORE_AGENTS 驱动初始化');

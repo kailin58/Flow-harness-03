@@ -64,30 +64,35 @@ async function run() {
   check('auditLog 初始为空', router.auditLog.length === 0);
 
   // ── Test 2: 层级判断 ────────────────────────────────────────
-  console.log('\nTest 2: AgentRegistry 层级字段');
-  const sup = reg.get('supervisor');
-  const exp = reg.get('explore');
-  check('supervisor level = 0', sup.level === 0);
-  check('explore level = 1',    exp.level === 1);
-  check('explore parentId = supervisor', exp.parentId === 'supervisor');
-  check('plan parentId = supervisor',    reg.get('plan').parentId === 'supervisor');
-  check('getLevel(supervisor) = 0',      reg.getLevel('supervisor') === 0);
-  check('getLevel(explore) = 1',         reg.getLevel('explore') === 1);
-  check('getLevel(sub_explore_1) = 2',   reg.getLevel('sub_explore_1') === 2);
-  check('getParentId(explore) = supervisor', reg.getParentId('explore') === 'supervisor');
+  console.log('\nTest 2: AgentRegistry 层级字段（4层架构）');
+  const sup    = reg.get('supervisor');
+  const vp     = reg.get('vp_digital');
+  const exp    = reg.get('explore');
+  check('supervisor level = 0',     sup.level === 0);
+  check('vp_digital level = 1',     vp.level === 1);
+  check('vp_digital parentId = supervisor', vp.parentId === 'supervisor');
+  check('explore level = 2',        exp.level === 2);
+  check('explore parentId = vp_digital', exp.parentId === 'vp_digital');
+  check('plan parentId = vp_digital',    reg.get('plan').parentId === 'vp_digital');
+  check('getLevel(supervisor) = 0', reg.getLevel('supervisor') === 0);
+  check('getLevel(vp_digital) = 1', reg.getLevel('vp_digital') === 1);
+  check('getLevel(explore) = 2',    reg.getLevel('explore') === 2);
+  check('getLevel(sub_explore_1) = 3',   reg.getLevel('sub_explore_1') === 3);
+  check('getParentId(explore) = vp_digital', reg.getParentId('explore') === 'vp_digital');
   check('getParentId(sub_explore_1) = explore', reg.getParentId('sub_explore_1') === 'explore');
   check('getCommonParent(sub_e1, sub_e2) = explore',
     reg.getCommonParent('sub_explore_1', 'sub_explore_2') === 'explore');
   check('getCommonParent(sub_e1, sub_p1) = null (跨部门)',
     reg.getCommonParent('sub_explore_1', 'sub_plan_1') === null);
 
-  // ── Test 3: 合法的2方通信 ────────────────────────────────────
-  console.log('\nTest 3: 合法的2方通信');
-  shouldNotThrow('外部用户 → CEO', () => router.send('external', 'supervisor'));
-  shouldNotThrow('CEO → 外部用户', () => router.send('supervisor', 'external'));
-  shouldNotThrow('CEO → explore', () => router.send('supervisor', 'explore'));
-  shouldNotThrow('explore → CEO', () => router.send('explore', 'supervisor'));
-  shouldNotThrow('CEO → plan',    () => router.send('supervisor', 'plan'));
+  // ── Test 3: 合法的2方通信（4层架构）───────────────────────────
+  console.log('\nTest 3: 合法的2方通信（4层架构）');
+  shouldNotThrow('外部用户 → CEO',              () => router.send('external', 'supervisor'));
+  shouldNotThrow('CEO → 外部用户',              () => router.send('supervisor', 'external'));
+  shouldNotThrow('CEO → vp_digital（CEO→VP）',  () => router.send('supervisor', 'vp_digital'));
+  shouldNotThrow('vp_digital → CEO（VP→CEO）',  () => router.send('vp_digital', 'supervisor'));
+  shouldNotThrow('vp_digital → explore（VP→总监）', () => router.send('vp_digital', 'explore'));
+  shouldNotThrow('explore → vp_digital（总监→VP）', () => router.send('explore', 'vp_digital'));
   shouldNotThrow('explore → sub_explore_1（总监→子Agent）',
     () => router.send('explore', 'sub_explore_1'));
   shouldNotThrow('sub_explore_1 → explore（子Agent→总监）',
@@ -95,22 +100,31 @@ async function run() {
 
   // ── Test 4: 非法通信——跳级 ──────────────────────────────────
   console.log('\nTest 4: 非法通信 — 跳级');
-  shouldThrow('CEO → sub_explore_1（跳级）',
+  shouldThrow('CEO → explore（跳过VP，禁止）',
+    () => router.send('supervisor', 'explore'),
+    COMM_RESULT.DENIED_SKIP_LEVEL);
+  shouldThrow('CEO → plan（跳过VP，禁止）',
+    () => router.send('supervisor', 'plan'),
+    COMM_RESULT.DENIED_SKIP_LEVEL);
+  shouldThrow('CEO → sub_explore_1（跨级）',
     () => router.send('supervisor', 'sub_explore_1'),
     COMM_RESULT.DENIED_SKIP_LEVEL);
-  shouldThrow('sub_explore_1 → CEO（跳级）',
+  shouldThrow('explore → CEO（跳过VP上报，禁止）',
+    () => router.send('explore', 'supervisor'),
+    COMM_RESULT.DENIED_SKIP_LEVEL);
+  shouldThrow('sub_explore_1 → CEO（跨级）',
     () => router.send('sub_explore_1', 'supervisor'),
     COMM_RESULT.DENIED_SKIP_LEVEL);
 
-  // ── Test 5: 非法通信——平级无上级 ─────────────────────────────
+  // ── Test 5: 非法通信——平级需三方会话 ────────────────────────
   console.log('\nTest 5: 非法通信 — 平级需三方会话');
-  shouldThrow('explore → plan（需三方会话）',
+  shouldThrow('explore → plan（同VP下总监↔总监 需VP主持三方）',
     () => router.send('explore', 'plan'),
     COMM_RESULT.DENIED_NEED_3WAY);
-  shouldThrow('plan → inspector（需三方会话）',
+  shouldThrow('plan → inspector（同VP下总监↔总监 需VP主持三方）',
     () => router.send('plan', 'inspector'),
     COMM_RESULT.DENIED_NEED_3WAY);
-  shouldThrow('sub_e1 → sub_e2（同部门子Agent需三方）',
+  shouldThrow('sub_e1 → sub_e2（同总监下子Agent需总监主持三方）',
     () => router.send('sub_explore_1', 'sub_explore_2'),
     COMM_RESULT.DENIED_NEED_3WAY);
 
@@ -138,20 +152,20 @@ async function run() {
     () => router.send('explore', 'external'),
     COMM_RESULT.DENIED_EXTERNAL);
 
-  // ── Test 8: 三方会话——总监间（CEO主持）──────────────────────
-  console.log('\nTest 8: 三方会话 — 总监 ↔ 总监');
-  const sess1 = router.openDirectorSession('explore', 'plan');
+  // ── Test 8: 三方会话——总监间（VP主持）──────────────────────
+  console.log('\nTest 8: 三方会话 — 同VP下总监 ↔ 总监');
+  const sess1 = router.openDirectorSession('explore', 'plan', 'vp_digital');
   check('会话创建成功', sess1.ok && !!sess1.sessionId);
   check('会话含3个参与者', router.getSession(sess1.sessionId).participants.length === 3);
-  check('主持人是CEO', router.getSession(sess1.sessionId).moderator === 'supervisor');
+  check('主持人是VP(vp_digital)', router.getSession(sess1.sessionId).moderator === 'vp_digital');
 
   // 在会话内发消息
   shouldNotThrow('explore 在会话内发消息',
     () => router.sendInSession(sess1.sessionId, 'explore', { text: '方案确认' }));
   shouldNotThrow('plan 在会话内发消息',
     () => router.sendInSession(sess1.sessionId, 'plan', { text: '同意' }));
-  shouldNotThrow('CEO 在会话内发消息',
-    () => router.sendInSession(sess1.sessionId, 'supervisor', { text: '通过' }));
+  shouldNotThrow('vp_digital（主持人）在会话内发消息',
+    () => router.sendInSession(sess1.sessionId, 'vp_digital', { text: '通过' }));
 
   // 非参与者不能发消息
   shouldThrow('general（非参与者）不能在会话内发消息',
@@ -268,17 +282,21 @@ async function run() {
   check('包含规则 0b（CEO→外部）', ruleNos.includes('0b'));
   check('包含规则 0c（外部→非CEO禁止）', ruleNos.includes('0c'));
   check('包含规则 0d（非CEO→外部禁止）', ruleNos.includes('0d'));
-  check('包含规则 1a（CEO→总监）', ruleNos.includes('1a'));
-  check('包含规则 1b（总监→CEO）', ruleNos.includes('1b'));
-  check('包含规则 3a（总监→子Agent）', ruleNos.includes('3a'));
-  check('包含规则 3b（子Agent→总监）', ruleNos.includes('3b'));
-  check('包含规则 5a（CEO→子Agent跨级禁止）', ruleNos.includes('5a'));
-  check('包含规则 5b（子Agent→CEO跨级禁止）', ruleNos.includes('5b'));
-  check('包含规则 2（总监↔总监需三方）',      ruleNos.includes('2'));
-  check('包含规则 4（子Agent↔子Agent需三方）', ruleNos.includes('4'));
-  check('包含规则 6a（总监→跨部门子Agent禁止）',  ruleNos.includes('6a'));
-  check('包含规则 6b（子Agent→非自己总监禁止）',  ruleNos.includes('6b'));
-  check('包含规则 7（跨部门子Agent禁止）',    ruleNos.includes('7'));
+  check('包含规则 1a（CEO→VP）',             ruleNos.includes('1a'));
+  check('包含规则 1b（VP→CEO）',             ruleNos.includes('1b'));
+  check('包含规则 2a（VP→自己的总监）',       ruleNos.includes('2a'));
+  check('包含规则 2b（总监→自己的VP）',       ruleNos.includes('2b'));
+  check('包含规则 3a（总监→子Agent）',        ruleNos.includes('3a'));
+  check('包含规则 3b（子Agent→总监）',        ruleNos.includes('3b'));
+  check('包含规则 5a（CEO→总监/子Agent跨级禁止）', ruleNos.includes('5a'));
+  check('包含规则 5b（总监/子Agent→CEO跨级禁止）', ruleNos.includes('5b'));
+  check('包含规则 VP-VP（VP↔VP需三方）',     ruleNos.includes('VP-VP'));
+  check('包含规则 DIR-DIR（同VP总监↔总监需三方）', ruleNos.includes('DIR-DIR'));
+  check('包含规则 SUB-SUB（同总监子Agent↔子Agent需三方）', ruleNos.includes('SUB-SUB'));
+  check('包含规则 6c（总监→跨部门子Agent禁止）', ruleNos.includes('6c'));
+  check('包含规则 6d（子Agent→非自己总监禁止）', ruleNos.includes('6d'));
+  check('包含规则 7（跨VP总监禁止）',        ruleNos.includes('7'));
+  check('包含规则 8（跨部门子Agent禁止）',   ruleNos.includes('8'));
   check('包含规则 X（兜底拒绝）',            ruleNos.includes('X'));
 
   // 兜底规则必须是最后一条
@@ -355,27 +373,27 @@ async function run() {
   check('审计日志非空', log15.length > 0);
   check('每条日志含 ruleNo 字段', log15.every(e => typeof e.ruleNo === 'string'));
 
-  const entry1a = log15.find(e => e.from === 'supervisor' && e.to === 'explore' && e.ok);
-  check('CEO→总监 日志 ruleNo = 1a', entry1a?.ruleNo === '1a');
+  const entry1a = log15.find(e => e.from === 'supervisor' && e.to === 'vp_digital' && e.ok);
+  check('CEO→VP 日志 ruleNo = 1a', entry1a?.ruleNo === '1a');
 
-  const entry2  = log15.find(e => e.from === 'explore'   && e.to === 'plan'    && !e.ok);
-  check('总监↔总监 违规 日志 ruleNo = 2', entry2?.ruleNo === '2');
+  const entryDIR = log15.find(e => e.from === 'explore' && e.to === 'plan' && !e.ok);
+  check('总监↔总监 违规 日志 ruleNo = DIR-DIR', entryDIR?.ruleNo === 'DIR-DIR');
 
   const entry0a = log15.find(e => e.from === 'external'  && e.to === 'supervisor' && e.ok);
   check('外部→CEO 日志 ruleNo = 0a', entry0a?.ruleNo === '0a');
 
   // ══════════════════════════════════════════════════════════════
-  // Test 16: openDirectorSession 强制使用 SESSION_TOPOLOGY 中的 CEO
+  // Test 16: openDirectorSession 使用 SESSION_TOPOLOGY（VP主持）
   // ══════════════════════════════════════════════════════════════
-  console.log('\nTest 16: openDirectorSession 强制 CEO 主持');
+  console.log('\nTest 16: openDirectorSession — VP主持（4层架构）');
 
   const reg16 = new AgentRegistry();
   reg16.initializeCoreAgents();
   const cr16  = new CommRouter(reg16, { strict: true });
 
-  const sess16 = cr16.openDirectorSession('explore', 'plan');
+  const sess16 = cr16.openDirectorSession('explore', 'plan', 'vp_digital');
   check('openDirectorSession 成功', sess16.ok);
-  check('主持人是 supervisor', cr16.getSession(sess16.sessionId).moderator === 'supervisor');
+  check('主持人是 vp_digital', cr16.getSession(sess16.sessionId).moderator === 'vp_digital');
   check('sessionType 是 DIRECTOR_DIRECTOR', sess16.sessionType === 'DIRECTOR_DIRECTOR');
 
   // openSubAgentSession

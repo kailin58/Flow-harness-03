@@ -30,6 +30,8 @@ const DeliberationEngine  = require('./deliberation-engine');
 const ScheduleMemory      = require('./schedule-memory');
 const ComplianceChecker   = require('./compliance-checker');
 const CommRouter          = require('./comm-router');
+const { TaskStateMachine, TASK_STATE } = require('./task-state-machine');
+const { processL1, processL2 } = require('./layer-hooks');
 
 /**
  * 默认配置常量
@@ -64,15 +66,16 @@ class SupervisorAgent {
     // ── 知识库：数据存在全局目录，与业务项目隔离 ────────────────
     this.knowledgeBase = new KnowledgeBase(this.storage.knowledgeDir);
 
-    // ── Layer 1: 任务编排层 ──────────────────────────────────────
-    // 1+5 架构：1 CEO + 5 总监（explore/plan/general/inspector/research）
-    // step1_analyze → step2_decompose → step3_assign → (商议) → step4_execute
+    // ── L3 任务编排层（4层架构：CEO路由→VP01→总监→子Agent）──────────
+    // 路由流程：外部输入 → L1入口扩展 → L2权限管理 → L3任务编排
+    // CEO职责：路由决策（match not guess），按VP能力标签分配，不直接找总监
+    // step1_analyze → step2_decompose → step3_assign(via VP01) → (商议L4) → step4_execute
     this.taskAnalyzer = new TaskAnalyzer();
     this.taskDecomposer = new TaskDecomposer({ knowledgeBase: this.knowledgeBase });
 
-    // 初始化 Agent Registry（写死 6 个核心角色，不可增减）
+    // 初始化 Agent Registry（4层架构：1 CEO + 1 VP01 + 6 总监 = 8 核心角色）
     this.agentRegistry = new AgentRegistry();
-    this.agentRegistry.initializeCoreAgents();  // 1 CEO + 5 总监 = 6 个角色
+    this.agentRegistry.initializeCoreAgents();
 
     // 传入 agentRegistry 到 TaskDispatcher
     this.taskDispatcher = new TaskDispatcher(this.agentRegistry);
@@ -86,7 +89,7 @@ class SupervisorAgent {
     this.agentsParser = new AgentsParser();
     this.agentsParser.parse();
 
-    // ── Layer 6: 反馈闭环层 ──────────────────────────────────────
+    // ── L9 反馈闭环层 ────────────────────────────────────────────
     // step6_review: 6a回顾 → 6b优化 → 6c验证 → 6d固化，循环直到满意
     const cfgObj = (config && typeof config === 'object') ? config : {};
     this.reviewLoop = new ReviewLoop({
@@ -121,18 +124,23 @@ class SupervisorAgent {
       maxCheckpoints: config.maxCheckpoints || 20
     });
 
-    // ── Layer 2: 安全策略层 ──────────────────────────────────────
+    // ── L4 协作编排层（TaskStateMachine）────────────────────────
+    // 7状态任务生命周期：PENDING→DELIBERATING→PLANNING→EXECUTING→INSPECTING→REVIEWING→DONE/FAILED
+    // 每个进入 execute() 的任务都会在此层创建独立的 TaskStateMachine 实例
+    this._taskStateMachines = new Map();   // taskId → TaskStateMachine
+
+    // ── L5 安全策略层 ────────────────────────────────────────────
     this.policyChecker = new PolicyChecker(this.config.policies || {});
 
-    // ── Layer 3: 执行监控层 ──────────────────────────────────────
+    // ── L6 执行监控层 ────────────────────────────────────────────
     this.executionMonitor = new ExecutionMonitor(this.config.monitoring || {});
     this.autoRetry = new AutoRetry(this.config.retry || {});
 
-    // ── Layer 4: Inspector 检查层 ────────────────────────────────
+    // ── L7 Inspector 检查层 ──────────────────────────────────────
     // step5_inspect: Inspector 深度检查（目标对齐/完整性/质量/风险/时间）
-    // this.inspector 已在 Layer 1 段初始化（与 agentRegistry 同生命周期）
+    // this.inspector 已在 L3 段初始化（与 agentRegistry 同生命周期）
 
-    // ── Layer 5: 质量门禁层 ──────────────────────────────────────
+    // ── L8 质量门禁层 ────────────────────────────────────────────
     this.qualityGate = new QualityGate(this.config.quality || {});
 
     // ── P1: 项目接入自动化 ───────────────────────────────────────
@@ -173,9 +181,10 @@ class SupervisorAgent {
     // ── 合规检查器（3层：来源校验 → 许可证 → CVE）
     this.complianceChecker = new ComplianceChecker(this.knowledgeBase);
 
-    // ── 通信路由器（1+5 架构通信规则强制执行）────────────────────
-    // 规则: CEO↔总监 直连 | 总监↔总监 必须CEO在场 | 禁止越级/跨部门
-    // strict:false → 违规记录警告但不中断流程（测试模式可改为 true 阻断）
+    // ── 通信路由器（4层架构通信规则强制执行）────────────────────
+    // 规则: CEO↔VP直连 | VP↔总监直连 | VP↔VP需CEO主持 | 总监↔总监需VP主持
+    // 禁止CEO直接跳过VP找总监 | 禁止跨VP/跨部门直接通信
+    // strict:false → 违规记录警告但不中断流程（生产环境可改为 true 阻断）
     this.commRouter = new CommRouter(this.agentRegistry, { strict: false, logAll: false });
   }
 
