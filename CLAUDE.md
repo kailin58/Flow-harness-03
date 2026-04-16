@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-请先遵守 AGENTS.md。
+请先遵守 AGENTS.md。涉及**学院 / 人机分流 / 对客三态 / 章节交叉引用**时，以 `meeting/20260417升级总结/09学院（可跑顺、可闭环、可扩展）.md` 的 **`§14.4` 速查**、**`§14.5`/`§14.5.6`（平台配置与租户白名单）**、**附录I（VP track 主编交稿）** 与 **`AGENTS.md`** 增补条为准，勿凭记忆写旧章节号。
 
 ## 项目概况
 ACmodus 是电商分销平台的生产化基线服务，技术栈：Node.js 20+ / Express 4.19 / MySQL 8+ / Prometheus / Kafka（outbox）。
