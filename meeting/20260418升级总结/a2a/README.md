@@ -9,7 +9,7 @@
 - `VP11（External）` 第三方 Agent 接入
 - `Protocol Port` 下的 `A2A Adapter`
 - 外部 Agent 能力发现、任务下发、流式状态、结果回收
-- 与 `L2 / L5 / L8 / L10 / S3` 的治理映射
+- 与 **2M+23L** 工作流及 **S3** 审计库的治理映射（`layer_id` 与层号以 [`../00_升级总结总览.md`](../00_升级总结总览.md) 为准；核心治理链不可绕过：`security.permissions`（L6）/`security.policy`（L14）/`quality.gate`（L18）/`release.publish`（L22））
 
 ---
 
