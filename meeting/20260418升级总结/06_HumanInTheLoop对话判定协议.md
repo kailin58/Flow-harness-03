@@ -6,6 +6,9 @@
 
 ---
 
+> 📌 架构速查 → [2M+23L 完整层级（含子层）](./00_升级总结总览.md#2m--23l-架构速查v230-权威版)
+> `layer_id` 永久稳定；`Lxx` 仅为显示编号。核心治理链路（不可绕过）：`security.permissions`(L6) / `security.policy`(L14) / `quality.gate`(L18) / `release.publish`(L22)
+
 ## 全局前置沟通规则（统一口径）
 
 - 任何任务下发前，最少完成 `2` 轮目标沟通（目标、范围、完成标准三项对齐）。
@@ -58,13 +61,13 @@ Round N：  O(N) → 溢出
 
 | 触发源 | 条件 | 来源层 |
 |--------|------|--------|
-| A | L4 状态机 `on_timeout = escalate` | L4 协作编排层 |
-| B | L8 质量门禁打回次数 ≥ N（N 可配置，默认 3） | L8 质量门禁层 |
-| C | L10 版本发布层审批等待超时 | L10 版本发布层 |
-| D | 工具调用风险等级 = **极高** | Tool Port / L5 安全策略层 |
-| E | 系统检测到置信度低于阈值（可配置，默认 0.4） | L7 Inspector 层 |
+| A | `orchestration.collab`（L13）状态机 `on_timeout = escalate` | L13 orchestration.collab 协作编排层 |
+| B | `quality.gate`（L18）质量门禁打回次数 ≥ N（N 可配置，默认 3） | L18 quality.gate 质量门禁层 |
+| C | `release.publish`（L22）版本发布层审批等待超时 | L22 release.publish 版本发布层 |
+| D | 工具调用风险等级 = **极高** | Tool Port / L14 security.policy 安全策略层 |
+| E | 系统检测到置信度低于阈值（可配置，默认 0.4） | L16 quality.inspector Inspector 层 |
 
-> **注**：触发条件 C 和 D 在原始 escalate 骨架设计时未覆盖（L10/Tool Port 为后续新增），本协议统一收口。
+> **注**：触发条件 C 和 D 在原始 escalate 骨架设计时未覆盖（L22/Tool Port 为后续新增），本协议统一收口。
 
 ---
 
@@ -75,7 +78,7 @@ Round N：  O(N) → 溢出
 ```json
 {
   "escalation_id":     "ESC-20260414-0023",
-  "context_snapshot":  "任务 T-889 在 EXECUTING 状态停留 3600s 超时，General Agent 执行第2轮重试失败。当前已完成子任务：[DB设计, API设计]，未完成：[前端实现, 测试]。触发源：L4 on_timeout=escalate",
+  "context_snapshot":  "任务 T-889 在 EXECUTING 状态停留 3600s 超时，General Agent 执行第2轮重试失败。当前已完成子任务：[DB设计, API设计]，未完成：[前端实现, 测试]。触发源：orchestration.collab（L13）on_timeout=escalate",
   "decision_options": [
     {"id": 1, "label": "回退到 PLANNING，重新规划方案"},
     {"id": 2, "label": "强制继续执行（重置超时计时）"},
@@ -262,10 +265,10 @@ CLOSED（写 S3 审计闭环记录）
 
 | 操作 | 触发层 | 说明 |
 |------|--------|------|
-| 覆盖 L8 门禁决策 | L8 质量门禁层 | 强制放行或强制打回，绕过自动评分 |
-| 修改任务状态 | L4 协作编排层 | 将任务强制推进到指定状态（需写 S3 审计） |
-| 终止任务 | L4 协作编排层 | 强制 FAILED，写终态审计记录 |
-| 强制降级 | L3 任务编排层 | 切换模型或降低并发，不中止任务 |
+| 覆盖 quality.gate（L18）门禁决策 | L18 quality.gate 质量门禁层 | 强制放行或强制打回，绕过自动评分 |
+| 修改任务状态 | L13 orchestration.collab 协作编排层 | 将任务强制推进到指定状态（需写 S3 审计） |
+| 终止任务 | L13 orchestration.collab 协作编排层 | 强制 FAILED，写终态审计记录 |
+| 强制降级 | L3 model.management 模型管理层 | 切换模型或降低并发，不中止任务 |
 | 追加 decision_options | 本协议 | 当系统预生成选项不满足时，人工可提出新方案 |
 
 ### 人工不可以做的
@@ -273,9 +276,9 @@ CLOSED（写 S3 审计闭环记录）
 | 禁止操作 | 原因 | 约束来源 |
 |----------|------|----------|
 | 绕过 S3 审计写入 | S3 永久保留是整个架构的信任基石；一旦可绕过，所有审计失效 | S3 设计约束（见 00_升级总结总览.md） |
-| 直接修改 L11 进化结果 | 进化结果必须经 L10 发布链路；人工直改等于架空 L10 门禁 | L11 设计约束 |
+| 直接修改 evolution.experiment（L23）进化结果 | 进化结果必须经 release.publish（L22）发布链路；人工直改等于架空 L22 门禁 | L23 设计约束 |
 | 删除历史累加器记录 | 累加器快照写入 S3 后不可删除，只可归档 | S3 设计约束 |
-| 跨租户操作 | 即使是平台管理员，也不得以 escalate 为由操作其他租户的任务 | L2 权限设计约束 |
+| 跨租户操作 | 即使是平台管理员，也不得以 escalate 为由操作其他租户的任务 | L6 security.permissions 权限设计约束 |
 
 ---
 
@@ -285,11 +288,11 @@ CLOSED（写 S3 审计闭环记录）
 
 ```
 action.type = "rollback"
-  → L4 状态机执行 rollback_to（目标状态）
+  → orchestration.collab（L13）状态机执行 rollback_to（目标状态）
   → 写 S3：操作类型=HUMAN_ROLLBACK，执行人=escalation_id，意图摘要=累加器 action 字段
 
 action.type = "continue"
-  → L4 重置 timeout 计时，任务恢复推进
+  → orchestration.collab（L13）重置 timeout 计时，任务恢复推进
   → 写 S3：操作类型=HUMAN_CONTINUE
 
 action.type = "terminate"
@@ -297,7 +300,7 @@ action.type = "terminate"
   → 写 S3：终态记录，包含完整累加器快照
 
 action.type = "downgrade"
-  → L3 切换模型配置（从累加器 constraints 中读取目标模型）
+  → model.management（L3）切换模型配置（从累加器 constraints 中读取目标模型）
   → 重新进入 EXECUTING 状态，重置超时
 
 action.type = "custom"（人工追加的新选项）
@@ -326,11 +329,11 @@ action.type = "custom"（人工追加的新选项）
 
 | 模块 | 关系 |
 |------|------|
-| L4 协作编排层 | 触发源 A；执行 rollback/continue/terminate 指令 |
-| L8 质量门禁层 | 触发源 B；人工可覆盖 L8 决策 |
-| L10 版本发布层 | 触发源 C；custom action 可触发 L10 手动发布流程 |
-| L5 安全策略层 + Tool Port | 触发源 D（极高风险工具调用） |
-| L7 Inspector 层 | 触发源 E（低置信度检测） |
+| L13 orchestration.collab 协作编排层 | 触发源 A；执行 rollback/continue/terminate 指令 |
+| L18 quality.gate 质量门禁层 | 触发源 B；人工可覆盖 quality.gate（L18）决策 |
+| L22 release.publish 版本发布层 | 触发源 C；custom action 可触发 release.publish（L22）手动发布流程 |
+| L14 security.policy 安全策略层 + Tool Port | 触发源 D（极高风险工具调用） |
+| L16 quality.inspector Inspector 层 | 触发源 E（低置信度检测） |
 | S1 上下文库 | context_snapshot 的数据来源（读取后压缩） |
 | S3 审计库 | 所有审计记录写入目标（永久保留） |
 | S4 规则库 | max_rounds / confidence_threshold 等参数配置来源 |
