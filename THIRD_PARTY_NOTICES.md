@@ -18,7 +18,7 @@ The entries below are currently recorded as research/reference sources unless a 
 
 Governance note:
 
-GenericAgent concepts must be re-wrapped through Flow Harness `Tool Port`, `Skill Registry`, `VP11 / A2A Adapter`, `L4 / L8 / L12 / L15` governance gates, and S3 audit requirements before production use.
+GenericAgent concepts must be re-wrapped through Flow Harness `Tool Port`, `Skill Registry`, `VP11 / A2A Adapter`, the v23.0 **core governance chain** (`security.permissions` L6 / `security.policy` L14 / `quality.gate` L18 / `release.publish` L22), and S3 audit requirements before production use.
 
 ---
 
