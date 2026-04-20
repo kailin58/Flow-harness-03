@@ -294,4 +294,4 @@ node /path/to/flow-harness/src/cli.js init
 
 ## 许可证
 
-MIT
+AGPL-3.0
